@@ -9,6 +9,7 @@ import {
   SectionLabel,
   Stat,
 } from "../shared/Primitives";
+import { HeroScene } from "./HeroScene";
 import { IcArrow, IcBolt, IcShield, IcWallet } from "../shared/icons";
 
 const WIRE: { agent: "scout" | "voice" | "product" | "tender"; text: string }[] =
@@ -21,27 +22,38 @@ const WIRE: { agent: "scout" | "voice" | "product" | "tender"; text: string }[] 
     { agent: "tender", text: "эскроу раскрыт · работа #1987 принята пользователем" },
   ];
 
-const LEDGER = [
+/* компактные продающие преимущества — строками, не карточками */
+const WINS: {
+  n: string;
+  icon: React.ReactNode;
+  tint: string;
+  claim: string;
+  body: string;
+  stat: string;
+}[] = [
   {
     n: "01",
-    title: "Холодный старт — решён",
-    body: "Подрядчиков нет в базе? ИИ-армия сканирует 2ГИС и Яндекс Карты, звонит бригадам голосовым ИИ и собирает отклики в WhatsApp — без регистрации с их стороны.",
-    icon: <IcBolt />,
-    tint: "text-amber-300",
+    icon: <IcWallet />,
+    tint: "text-[#12857a] bg-[#12857a]/10",
+    claim: "Кэшбек бьёт рыночное дно",
+    body: "Партнёрская цена минус кэшбек Aura: 23 490 − 2 584 = 20 906 ₽ — ниже самого дешёвого маркетплейса, с официальной гарантией.",
+    stat: "−1 084 ₽ с покупки",
   },
   {
     n: "02",
-    title: "Доверие — инженерно",
-    body: "Каждый отклик нормализуется: скрытые доплаты наружу, гарантия взвешена, споры проверены. Деньги сидят в эскроу, пока вы не подпишете акт.",
-    icon: <IcShield />,
-    tint: "text-violet-300",
+    icon: <IcBolt />,
+    tint: "text-[#c9871b] bg-[#e8a33d]/15",
+    claim: "Подрядчики находятся сами",
+    body: "ИИ-армия сканирует 2ГИС и Яндекс Карты, звонит бригадам голосом и собирает отклики в WhatsApp — подрядчикам не нужно регистрироваться.",
+    stat: "первый отклик ~3 мин 40 с",
   },
   {
     n: "03",
-    title: "Честная математика",
-    body: "Агент Товаров показывает сырой рыночный пол — и бьёт его: цена партнёра минус кэшбек Aura, посчитанная на ваших глазах.",
-    icon: <IcWallet />,
-    tint: "text-cyan-300",
+    icon: <IcShield />,
+    tint: "text-[#6d5fd0] bg-[#6d5fd0]/10",
+    claim: "Деньги в безопасности до приёмки",
+    body: "Эскроу замораживает оплату: подрядчик получает её только после акта, который подписываете вы. Спор — арбитраж Aura за 24 часа.",
+    stat: "0 ₽ риска",
   },
 ];
 
@@ -60,156 +72,154 @@ export function MissionBoard() {
   const line = WIRE[wire];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12">
-      {/* ---- слева: манифест ---- */}
-      <div className="flex flex-col justify-between gap-10 lg:col-span-7">
-        <div>
+    <div className="space-y-8">
+      {/* ---- живой hero: процесс подбора ---- */}
+      <Reveal>
+        <HeroScene />
+      </Reveal>
+
+      <div className="grid gap-8 lg:grid-cols-12">
+        {/* ---- слева: преимущества + метрики ---- */}
+        <div className="lg:col-span-7">
           <Reveal>
-            <SectionLabel>сессия 0426 · оркестратор в сети</SectionLabel>
+            <SectionLabel>почему это выгодно</SectionLabel>
           </Reveal>
-          <h1 className="mt-5 text-[clamp(2.4rem,6vw,4.6rem)] leading-[1.02] font-semibold tracking-tight text-ink-50">
-            {["Три агента.", "Один честный", "ответ."].map((l, i) => (
-              <span key={l} className="block overflow-hidden">
-                <motion.span
-                  className="block"
-                  initial={{ y: "110%" }}
-                  animate={{ y: 0 }}
-                  transition={{
-                    delay: 0.15 + i * 0.12,
-                    duration: 0.7,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                >
-                  {i === 1 ? (
-                    <>
-                      Один <span className="text-cyan-300">честный</span>
-                    </>
-                  ) : (
-                    l
-                  )}
-                </motion.span>
-              </span>
+          <div className="mt-3 divide-y divide-ink-700 border-y border-ink-700">
+            {WINS.map((w, i) => (
+              <Reveal key={w.n} i={i}>
+                <div className="group flex items-start gap-4 py-4 transition-all duration-300 hover:bg-ink-850 hover:pl-2 sm:gap-5">
+                  <span className="font-display text-xl font-bold text-ink-500/70 transition-colors group-hover:text-ink-300">
+                    {w.n}
+                  </span>
+                  <span
+                    className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border-[1.5px] border-ink-50 text-base shadow-[2px_2px_0_#211b14] transition-transform duration-300 group-hover:-rotate-6 ${w.tint}`}
+                  >
+                    {w.icon}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display text-[15px] font-semibold text-ink-50">
+                      {w.claim}
+                    </h3>
+                    <p className="mt-1 text-[12.5px] leading-relaxed text-ink-300">
+                      {w.body}
+                    </p>
+                  </div>
+                  <span className="mt-1 hidden shrink-0 rounded-full border-[1.5px] border-ink-50 bg-paper px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-200 shadow-[2px_2px_0_#211b14] transition-transform duration-300 group-hover:translate-x-1 sm:inline-block">
+                    {w.stat}
+                  </span>
+                </div>
+              </Reveal>
             ))}
-          </h1>
+          </div>
           <Reveal i={3}>
-            <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-300">
-              Aura направляет одно предложение специализированным агентам,
-              которые покупают, торгуются и проверяют за вас — и показывают
-              работу в реальном времени, чтобы доверие возникло на экране, а не
-              на словах.
-            </p>
+            <div className="mt-5 grid grid-cols-2 gap-5 sm:grid-cols-4">
+              <Stat value="3/3" label="агентов в сети" accent />
+              <Stat value="11,2%" label="медианная экономия" />
+              <Stat value="3 мин 40 с" label="до первого отклика" />
+              <Stat value="4,2 млн ₽" label="сейчас в эскроу" />
+            </div>
           </Reveal>
         </div>
 
-        <Reveal i={4}>
-          <div className="grid grid-cols-2 gap-6 border-t border-ink-700 pt-6 sm:grid-cols-4">
-            <Stat value="3/3" label="агентов в сети" accent />
-            <Stat value="11,2%" label="медианная экономия" />
-            <Stat value="3 мин 40 с" label="до первого отклика" />
-            <Stat value="4,2 млн ₽" label="сейчас в эскроу" />
-          </div>
-        </Reveal>
-      </div>
+        {/* ---- справа: каналы агентов ---- */}
+        <div className="flex flex-col gap-4 lg:col-span-5">
+          <Reveal i={1}>
+            <Panel hover className="group relative overflow-hidden rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+              <div className="absolute inset-y-0 left-0 w-[4px] bg-[#12857a]" />
+              <div className="flex items-center justify-between">
+                <AgentBadge agent="product" />
+                <LiveDot className="text-[#12857a]" />
+              </div>
+              <h3 className="mt-4 font-display text-[17px] font-semibold text-ink-50">
+                Честный Выбор
+              </h3>
+              <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
+                Рыночный пол против партнёра с кэшбеком — вся математика на
+                экране, ничего не прячем.
+              </p>
+              <button
+                onClick={() => queueIntent("самые дешёвые AirPods Pro 3")}
+                className="sticker mt-4 inline-flex w-full items-center justify-between rounded-[12px] bg-[#12857a]/10 px-3.5 py-2.5 text-left text-[12.5px] font-semibold text-[#0e6e62]"
+              >
+                <span className="font-mono">самые дешёвые AirPods Pro 3…</span>
+                <IcArrow className="transition-transform group-hover:translate-x-1" />
+              </button>
+            </Panel>
+          </Reveal>
 
-      {/* ---- справа: каналы агентов ---- */}
-      <div className="flex flex-col gap-4 lg:col-span-5">
-        <Reveal i={2}>
-          <Panel hover className="group relative overflow-hidden p-5">
-            <div className="absolute inset-y-0 left-0 w-[3px] bg-cyan-400/70" />
-            <div className="flex items-center justify-between">
-              <AgentBadge agent="product" />
-              <LiveDot className="text-cyan-300" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-ink-50">
-              Честный Выбор
-            </h3>
-            <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
-              Рыночный пол против партнёра с кэшбеком — математика всегда
-              открыта, ничего не прячем.
-            </p>
-            <button
-              onClick={() => queueIntent("самые дешёвые AirPods Pro 3")}
-              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-cyan-400/25 bg-cyan-400/5 px-3.5 py-2.5 text-left text-[13px] text-cyan-100 transition-all duration-200 hover:translate-x-1 hover:border-cyan-300/60 hover:bg-cyan-400/10"
-            >
-              <span className="font-mono">самые дешёвые AirPods Pro 3…</span>
-              <IcArrow className="text-cyan-300" />
-            </button>
-          </Panel>
-        </Reveal>
+          <Reveal i={2}>
+            <Panel hover className="group relative overflow-hidden rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+              <div className="absolute inset-y-0 left-0 w-[4px] bg-[#6d5fd0]" />
+              <div className="flex items-center justify-between">
+                <AgentBadge agent="tender" />
+                <LiveDot className="text-[#6d5fd0]" />
+              </div>
+              <h3 className="mt-4 font-display text-[17px] font-semibold text-ink-50">
+                Решатель Услуг
+              </h3>
+              <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
+                Одно сообщение → ТЗ, живые торги и ранжированные отклики. С
+                ИИ-армией на холодном старте.
+              </p>
+              <button
+                onClick={() => queueIntent("заменить 3 окна под ключ")}
+                className="sticker mt-4 inline-flex w-full items-center justify-between rounded-[12px] bg-[#6d5fd0]/10 px-3.5 py-2.5 text-left text-[12.5px] font-semibold text-[#5a4ebd]"
+              >
+                <span className="font-mono">заменить 3 окна под ключ</span>
+                <IcArrow className="transition-transform group-hover:translate-x-1" />
+              </button>
+            </Panel>
+          </Reveal>
 
-        <Reveal i={3}>
-          <Panel hover className="group relative overflow-hidden p-5">
-            <div className="absolute inset-y-0 left-0 w-[3px] bg-violet-400/70" />
-            <div className="flex items-center justify-between">
-              <AgentBadge agent="tender" />
-              <LiveDot className="text-violet-300" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold text-ink-50">
-              Решатель Услуг
-            </h3>
-            <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
-              Одно сообщение превращается в ТЗ, живые торги и ранжированные
-              отклики — с ИИ-армией на холодном старте.
-            </p>
-            <button
-              onClick={() => queueIntent("заменить 3 окна под ключ")}
-              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-violet-400/25 bg-violet-400/5 px-3.5 py-2.5 text-left text-[13px] text-violet-100 transition-all duration-200 hover:translate-x-1 hover:border-violet-300/60 hover:bg-violet-400/10"
-            >
-              <span className="font-mono">заменить 3 окна под ключ</span>
-              <IcArrow className="text-violet-300" />
-            </button>
-          </Panel>
-        </Reveal>
-
-        {/* провод оркестратора */}
-        <Reveal i={4}>
-          <Panel className="flex items-center gap-3 px-4 py-3">
-            <span className="shrink-0 text-amber-300">
-              <IcBolt />
-            </span>
-            <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-              провод
-            </span>
-            <div className="relative h-5 flex-1 overflow-hidden">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={wire}
-                  initial={{ y: 14, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -14, opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="absolute inset-0 truncate font-mono text-xs text-ink-200"
-                >
-                  <span
-                    className={
-                      line.agent === "product"
-                        ? "text-cyan-300"
-                        : line.agent === "tender"
-                          ? "text-violet-300"
-                          : "text-amber-300"
-                    }
+          <Reveal i={3}>
+            <Panel className="flex items-center gap-3 rounded-[16px] border-[1.5px] border-ink-50 px-4 py-3 shadow-[3px_3px_0_#211b14]">
+              <span className="shrink-0 text-[#c9871b]">
+                <IcBolt />
+              </span>
+              <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
+                провод
+              </span>
+              <div className="relative h-5 flex-1 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={wire}
+                    initial={{ y: 14, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -14, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="absolute inset-0 truncate font-mono text-xs text-ink-200"
                   >
-                    {line.agent === "product"
-                      ? "агент товаров"
-                      : line.agent === "tender"
-                        ? "тендерный"
-                        : line.agent}
-                  </span>{" "}
-                  {line.text}
-                </motion.span>
-              </AnimatePresence>
-            </div>
-          </Panel>
-        </Reveal>
+                    <span
+                      className={
+                        line.agent === "product"
+                          ? "text-[#12857a]"
+                          : line.agent === "tender"
+                            ? "text-[#6d5fd0]"
+                            : "text-[#c9871b]"
+                      }
+                    >
+                      {line.agent === "product"
+                        ? "агент товаров"
+                        : line.agent === "tender"
+                          ? "тендерный"
+                          : line.agent}
+                    </span>{" "}
+                    {line.text}
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            </Panel>
+          </Reveal>
+        </div>
       </div>
 
-      {/* ---- журнал запросов пользователя ---- */}
+      {/* ---- запросы пользователя ---- */}
       {sessions.length > 0 && (
-        <Reveal className="lg:col-span-12">
+        <Reveal>
           <div>
             <div className="mb-3 flex items-baseline justify-between">
               <SectionLabel>ваши запросы</SectionLabel>
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
                 клик — вернуться к сессии
               </span>
             </div>
@@ -218,23 +228,19 @@ export function MissionBoard() {
                 <button
                   key={s.id}
                   onClick={() => selectSession(s.id)}
-                  className={`group flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12.5px] transition-all duration-200 hover:-translate-y-0.5 ${
+                  className={`sticker-acc group flex items-center gap-2.5 rounded-full px-4 py-2 text-[12.5px] font-semibold ${
                     s.mode === "product"
-                      ? "border-cyan-400/25 bg-cyan-400/5 text-cyan-100 hover:border-cyan-300/60 hover:bg-cyan-400/10"
-                      : "border-violet-400/25 bg-violet-400/5 text-violet-100 hover:border-violet-300/60 hover:bg-violet-400/10"
-                  } ${s.id === activeId ? "ring-1 ring-current" : ""}`}
+                      ? "bg-[#12857a]/10 text-[#0e6e62]"
+                      : "bg-[#6d5fd0]/10 text-[#5a4ebd]"
+                  } ${s.id === activeId ? "ring-2 ring-ink-50" : ""}`}
                 >
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      s.mode === "product" ? "bg-cyan-300" : "bg-violet-300"
+                      s.mode === "product" ? "bg-[#12857a]" : "bg-[#6d5fd0]"
                     }`}
                   />
                   «{s.query}»
-                  <span
-                    className={`font-mono text-[9px] uppercase tracking-wider ${
-                      s.mode === "product" ? "text-cyan-300/70" : "text-violet-300/70"
-                    }`}
-                  >
+                  <span className="font-mono text-[9px] uppercase tracking-wider opacity-70">
                     {s.mode === "product"
                       ? s.claimed
                         ? "кэшбек ✓"
@@ -249,38 +255,6 @@ export function MissionBoard() {
           </div>
         </Reveal>
       )}
-
-      {/* ---- почему агенты выигрывают ---- */}
-      <Reveal className="lg:col-span-12">
-        <div className="mt-2">
-          <SectionLabel className="mb-4">почему агенты выигрывают</SectionLabel>
-          <div className="grid gap-px overflow-hidden rounded-xl border border-ink-700 bg-ink-700 md:grid-cols-3">
-            {LEDGER.map((row) => (
-              <div
-                key={row.n}
-                className="group bg-ink-850 p-6 transition-colors duration-300 hover:bg-ink-800"
-              >
-                <div className="flex items-baseline justify-between">
-                  <span className="font-mono text-xs text-ink-500">
-                    {row.n}
-                  </span>
-                  <span
-                    className={`text-xl opacity-70 transition-all duration-300 group-hover:scale-110 group-hover:opacity-100 ${row.tint}`}
-                  >
-                    {row.icon}
-                  </span>
-                </div>
-                <h4 className="mt-3 text-base font-semibold text-ink-50">
-                  {row.title}
-                </h4>
-                <p className="mt-2 text-[13px] leading-relaxed text-ink-300">
-                  {row.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Reveal>
     </div>
   );
 }
