@@ -1,0 +1,38 @@
+{
+  "id": "airpods-pro-3",
+  "name": "AirPods Pro 3",
+  "category": "Audio · TWS earbuds",
+  "image": "https://image.qwenlm.ai/generated-images/ef656ee5-870f-44eb-a983-8a7eca69ae96/_result.png",
+  "query": "cheapest AirPods Pro 3 with real warranty",
+  "marketplaces_scanned": 14,
+  "market_cheapest": {
+    "retailer": "Ozon Global",
+    "price": 21990,
+    "delivery": "6–9 days",
+    "warranty": "seller-only, 14 days",
+    "returns": "paid return shipping"
+  },
+  "partner": {
+    "retailer": "M.Video · Aura partner",
+    "price": 23490,
+    "cashback_rate": 0.11,
+    "cashback": 2584,
+    "final": 20906,
+    "delivery": "tomorrow, 2-hour slot",
+    "warranty": "1 year, official distributor",
+    "returns": "30 days, free pickup"
+  },
+  "savings_vs_market": 1084,
+  "price_index_90d": [
+    24990, 24790, 24490, 24190, 23990, 23690, 23990, 23490, 23190, 22790,
+    22490, 22190, 21990, 21990
+  ],
+  "cashback_source": "CPA route #A-114 · partner margin share 62/38",
+  "trust_ledger": [
+    { "label": "Price vs 90-day index", "value": "−16.3% · near historic floor", "tone": "good" },
+    { "label": "Partner fulfillment score", "value": "98.2% on-time · 412 deals", "tone": "good" },
+    { "label": "Serial-number check", "value": "passes Apple coverage API", "tone": "good" },
+    { "label": "Marketplace grey-import risk", "value": "high on cheapest offer", "tone": "bad" },
+    { "label": "Cashback payout", "value": "instant to Aura wallet", "tone": "neutral" }
+  ]
+}

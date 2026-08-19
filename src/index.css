@@ -1,1 +1,145 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --color-ink-950: #06070a;
+  --color-ink-900: #0b0c10;
+  --color-ink-850: #0e1016;
+  --color-ink-800: #12141c;
+  --color-ink-700: #1b1f2b;
+  --color-ink-600: #262b3a;
+  --color-ink-500: #3a4152;
+  --color-ink-400: #545c70;
+  --color-ink-300: #7d8598;
+  --color-ink-200: #a6adbd;
+  --color-ink-100: #d2d7e2;
+  --color-ink-50: #eef0f6;
+}
+
+/* ---------- mode accent machinery ---------- */
+:root {
+  --acc: #8b93a5;
+  --acc-rgb: 139 147 165;
+}
+[data-accent="cyan"] {
+  --acc: #67e8f9;
+  --acc-rgb: 103 232 249;
+}
+[data-accent="violet"] {
+  --acc: #a78bfa;
+  --acc-rgb: 167 139 250;
+}
+[data-accent="amber"] {
+  --acc: #fbbf24;
+  --acc-rgb: 251 191 36;
+}
+
+.acc-text { color: var(--acc); }
+.acc-bg { background-color: var(--acc); }
+.acc-border { border-color: rgb(var(--acc-rgb) / 0.5); }
+.acc-soft { background-color: rgb(var(--acc-rgb) / 0.08); }
+.acc-faint { background-color: rgb(var(--acc-rgb) / 0.045); }
+.acc-ring {
+  box-shadow:
+    0 0 0 1px rgb(var(--acc-rgb) / 0.4),
+    0 12px 60px -18px rgb(var(--acc-rgb) / 0.45);
+}
+.acc-glow { box-shadow: 0 0 26px -6px rgb(var(--acc-rgb) / 0.55); }
+.acc-anim {
+  transition:
+    color 0.45s ease,
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.6s ease,
+    opacity 0.45s ease;
+}
+
+/* ---------- base ---------- */
+html {
+  color-scheme: dark;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--color-ink-950);
+  color: var(--color-ink-100);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection {
+  background: rgb(var(--acc-rgb) / 0.28);
+  color: #fff;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--color-ink-600); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ---------- layered ambient background ---------- */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 78%);
+}
+.noise {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.55'/></svg>");
+  background-size: 160px 160px;
+}
+
+/* ---------- keyframes ---------- */
+@keyframes drift {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  12% { opacity: 0.9; }
+  88% { opacity: 0.9; }
+  100% { transform: translate3d(24px, -90px, 0); opacity: 0; }
+}
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.55); opacity: 0.45; }
+}
+@keyframes caretBlink {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes ringPing {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+.dot-live { animation: pulseDot 2.2s ease-in-out infinite; }
+.caret { animation: caretBlink 1s steps(1) infinite; }
+.shimmer-bar {
+  background: linear-gradient(
+    100deg,
+    rgb(var(--acc-rgb) / 0.12) 35%,
+    rgb(var(--acc-rgb) / 0.75) 50%,
+    rgb(var(--acc-rgb) / 0.12) 65%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+.ring-ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--acc-rgb) / 0.7);
+  animation: ringPing 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot-live, .caret, .shimmer-bar { animation: none; }
+  .ring-ping::after { display: none; }
+  * { scroll-behavior: auto !important; }
+}

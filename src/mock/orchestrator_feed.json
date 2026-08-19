@@ -1,0 +1,161 @@
+{
+  "session": "0426",
+  "events": [
+    {
+      "id": "ev01",
+      "t": 400,
+      "agent": "orchestrator",
+      "kind": "route",
+      "text": "Intent classified → SERVICE · window replacement",
+      "detail": "confidence 0.96 · routed to Tender Agent"
+    },
+    {
+      "id": "ev02",
+      "t": 1400,
+      "agent": "tender",
+      "kind": "spec",
+      "text": "Drafting technical spec (ТЗ) from a single message…",
+      "detail": "extracting openings, profile, floor, GOST refs"
+    },
+    {
+      "id": "ev03",
+      "t": 2900,
+      "agent": "tender",
+      "kind": "spec",
+      "text": "ТЗ ready · 5 spec lines · 3 hard constraints",
+      "detail": "user confirmed silently — no forms, no calls"
+    },
+    {
+      "id": "ev04",
+      "t": 3900,
+      "agent": "tender",
+      "kind": "check",
+      "text": "Checking verified partner DB in district…",
+      "detail": "query: windows · pvc · turnkey · radius 12 km"
+    },
+    {
+      "id": "ev05",
+      "t": 5000,
+      "agent": "orchestrator",
+      "kind": "escalate",
+      "text": "0 verified partners available → escalating to AI ARMY",
+      "detail": "cold-start protocol engaged · zero-friction recruitment"
+    },
+    {
+      "id": "ev06",
+      "t": 6200,
+      "agent": "scout",
+      "kind": "scout",
+      "text": "Scout scanning 2GIS + Yandex Maps…",
+      "detail": "12 km radius · category: window installation"
+    },
+    {
+      "id": "ev07",
+      "t": 8000,
+      "agent": "scout",
+      "kind": "scout",
+      "text": "Scout found 45 contractors → 12 targets",
+      "detail": "filtered: rating ≥ 4.2 · active phone · no blacklist hits"
+    },
+    {
+      "id": "ev08",
+      "t": 9300,
+      "agent": "voice",
+      "kind": "voice",
+      "text": "Voice AI dialing MasterPlus LLC…",
+      "detail": "script: qualify capacity this week → hand off to Smart-Link"
+    },
+    {
+      "id": "ev09",
+      "t": 11100,
+      "agent": "voice",
+      "kind": "voice",
+      "text": "Call answered · 42s · capacity confirmed",
+      "detail": "agreed to price the ТЗ via Smart-Link today"
+    },
+    {
+      "id": "ev10",
+      "t": 12200,
+      "agent": "negotiator",
+      "kind": "whatsapp",
+      "text": "Sent ТЗ via WhatsApp Smart-Link → MasterPlus",
+      "detail": "aura.link/w7x2 · one-field bid form attached"
+    },
+    {
+      "id": "ev11",
+      "t": 13000,
+      "agent": "negotiator",
+      "kind": "whatsapp",
+      "text": "Batch-sent Smart-Link → OknaStroy, Aero, Ivan P. +8 more",
+      "detail": "personalized opener per contractor profile"
+    },
+    {
+      "id": "ev12",
+      "t": 14200,
+      "agent": "scout",
+      "kind": "open",
+      "text": "OknaStroy opened Smart-Link · 12s on page",
+      "detail": "viewed photo + spec · typing price…"
+    },
+    {
+      "id": "ev13",
+      "t": 15300,
+      "agent": "tender",
+      "kind": "bid",
+      "bidId": "b2",
+      "text": "Bid received · OknaStroy · 152,000 ₽ all-in",
+      "detail": "no hidden fees detected · 3-year warranty"
+    },
+    {
+      "id": "ev14",
+      "t": 16400,
+      "agent": "scout",
+      "kind": "open",
+      "text": "Aero Window Systems opened Smart-Link",
+      "detail": "second visit · checking warranty constraints"
+    },
+    {
+      "id": "ev15",
+      "t": 17600,
+      "agent": "tender",
+      "kind": "bid",
+      "bidId": "b1",
+      "text": "Bid received · MasterPlus · 148,500 ₽ base",
+      "detail": "fine-print scan: +18,500 ₽ in separate line items"
+    },
+    {
+      "id": "ev16",
+      "t": 18800,
+      "agent": "tender",
+      "kind": "bid",
+      "bidId": "b3",
+      "text": "Bid received · Ivan P. · 129,000 ₽ base",
+      "detail": "materials excluded: +9,400 ₽ estimated"
+    },
+    {
+      "id": "ev17",
+      "t": 20000,
+      "agent": "tender",
+      "kind": "bid",
+      "bidId": "b4",
+      "text": "Bid received · Aero Window Systems · 143,700 ₽",
+      "detail": "+3,000 ₽ hardware adjustment · 5-year warranty"
+    },
+    {
+      "id": "ev18",
+      "t": 21400,
+      "agent": "orchestrator",
+      "kind": "analyze",
+      "text": "Normalizing bids → apples-to-apples",
+      "detail": "stripping hidden fees · weighting warranty, reviews, disputes"
+    },
+    {
+      "id": "ev19",
+      "t": 22800,
+      "agent": "orchestrator",
+      "kind": "ready",
+      "text": "4 bids ranked · best value: Aero Window Systems",
+      "detail": "146,700 ₽ all-in · trust 93 · ready for escrow"
+    }
+  ]
+}
