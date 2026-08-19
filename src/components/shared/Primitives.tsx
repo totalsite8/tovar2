@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import type { AgentId } from "../../data/types";
 import { fmtRub } from "../../lib/format";
 import { IcChat, IcDoc, IcPhone, IcRadar, IcSpark, IcTag } from "./icons";
@@ -227,12 +227,12 @@ export function Stat({
 }
 
 /* ---------------- Motion preset ---------------- */
-export const rise = {
+export const rise: Variants = {
   hidden: { opacity: 0, y: 18 },
   show: (i: number = 0) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.07, duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+    transition: { delay: i * 0.07, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   }),
 };
 

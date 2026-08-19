@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts, newOrderId } from "../../data/api";
 import type { ProductPayload } from "../../data/types";
 import { useAuraStore } from "../../store/useAuraStore";
-import { fmtRub, pct } from "../../lib/format";
+import { fmtInt, fmtRub, pct } from "../../lib/format";
 import {
   AgentBadge,
   LiveDot,
@@ -16,7 +16,11 @@ import {
 import {
   IcArrow,
   IcCheck,
+  IcChevron,
+  IcRadar,
+  IcScale,
   IcShield,
+  IcSpark,
   IcTag,
   IcTv,
   IcVacuum,
@@ -24,223 +28,151 @@ import {
   IcX,
 } from "../shared/icons";
 
-/* ================================================================
-   КОМНАТА АГЕНТА ТОВАРОВ: витрина (4 разных формата карточек)
-   + детальное досье товара с математикой кэшбека
-   ================================================================ */
+/* ============================================================
+   Медленный, логичный таймлайн работы агента
+   ============================================================ */
+const PHASES = [
+  { at: 0, label: "Разбираю запрос…" },
+  { at: 1100, label: "Категория зафиксирована" },
+  { at: 2200, label: "Сканирую маркетплейсы и индексы цен…" },
+  { at: 4200, label: "Торгуюсь за кэшбек-маршруты…" },
+  { at: 5400, label: "Строю честный рейтинг…" },
+  { at: 6600, label: "Готово — показываю математику" },
+];
 
-export function ProductRoom() {
-  const { data: products, isLoading } = useQuery({
-    queryKey: ["products"],
-    queryFn: fetchProducts,
-  });
-  const sessions = useAuraStore((s) => s.sessions);
-  const activeId = useAuraStore((s) => s.activeId);
-  const query = useAuraStore((s) => s.query);
-  const session = sessions.find((s) => s.id === activeId);
-  const product = products?.find((p) => p.id === session?.productId);
-
-  if (isLoading || !products) {
-    return (
-      <div data-accent="cyan">
-        <RoomHeader query={query} back={false} />
-        <div className="mt-6 grid gap-4 md:grid-cols-12">
-          {[
-            { c: "md:col-span-7", h: "h-64" },
-            { c: "md:col-span-5", h: "h-64" },
-            { c: "md:col-span-5", h: "h-56" },
-            { c: "md:col-span-7", h: "h-56" },
-          ].map((b, i) => (
-            <Panel key={i} className={`${b.c} ${b.h} p-6`}>
-              <div
-                className="shimmer-bar h-4 w-40 rounded"
-                style={{ ["--acc-rgb" as string]: "103 232 249" }}
-              />
-              <div className="mt-6 space-y-3">
-                {[100, 84, 66].map((w, j) => (
-                  <div key={j} className="h-3 rounded bg-ink-700" style={{ width: `${w}%` }} />
-                ))}
-              </div>
-            </Panel>
-          ))}
-        </div>
-        <p className="mt-6 flex items-center gap-2 font-mono text-xs text-cyan-300">
-          <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-cyan-300" />
-          агент товаров сканирует маркетплейсы и кэшбек-маршруты…
-        </p>
-      </div>
+function useAgentPhase(ready: boolean, key: string) {
+  const [phase, setPhase] = useState(0);
+  const [scanned, setScanned] = useState(0);
+  useEffect(() => {
+    if (!ready) return;
+    setPhase(0);
+    setScanned(0);
+    const ts = PHASES.map((p, i) =>
+      window.setTimeout(() => setPhase(i + 1), p.at)
     );
-  }
+    const scanStart = PHASES[2].at;
+    const iv = window.setInterval(() => {
+      const el = performance.now() - t0;
+      if (el > scanStart) {
+        setScanned((s) => Math.min(14, s + 1));
+      }
+    }, 130);
+    const t0 = performance.now();
+    return () => {
+      ts.forEach(clearTimeout);
+      clearInterval(iv);
+    };
+  }, [ready, key]);
+  return { phase, scanned };
+}
 
-  if (!product) {
-    return (
-      <div data-accent="cyan">
-        <RoomHeader query={query} back={false} />
-        <Catalog products={products} />
-      </div>
-    );
-  }
+/* ============================================================
+   Витрина: 4 товара, 4 разных формата карточек
+   ============================================================ */
+const CARD_STYLES: Record<
+  string,
+  { cls: string; label: string; icon: React.ReactNode }
+> = {
+  audio: {
+    cls: "md:col-span-2 md:grid md:grid-cols-[1.15fr_1fr]",
+    label: "досье агента",
+    icon: <IcTag />,
+  },
+  sneakers: {
+    cls: "flex flex-col",
+    label: "подбор размера",
+    icon: <IcRadar />,
+  },
+  appliance: {
+    cls: "flex flex-col",
+    label: "сравнение офферов",
+    icon: <IcVacuum />,
+  },
+  tv: {
+    cls: "flex flex-col",
+    label: "момент покупки",
+    icon: <IcTv />,
+  },
+};
 
+function PriceTag({ p }: { p: ProductPayload }) {
   return (
-    <div data-accent="cyan">
-      <RoomHeader query={query} back />
-      <Detail key={product.id} product={product} claimed={!!session?.claimed} orderId={session?.orderId} />
+    <div className="flex items-baseline gap-2">
+      <span className="font-mono text-xl font-bold text-ink-50">
+        {fmtRub(p.partner.final)}
+      </span>
+      <span className="font-mono text-xs text-ink-400 line-through">
+        {fmtRub(p.market_cheapest.price)}
+      </span>
     </div>
   );
 }
 
-/* ---------------- шапка ---------------- */
-function RoomHeader({ query, back }: { query: string; back: boolean }) {
-  const setActiveProduct = useAuraStore((s) => s.setActiveProduct);
+function ProductCard({
+  p,
+  onOpen,
+  i,
+}: {
+  p: ProductPayload;
+  onOpen: () => void;
+  i: number;
+}) {
+  const style = CARD_STYLES[p.layout];
   return (
-    <div className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <SectionLabel>сессия 0426 / агент товаров</SectionLabel>
-        <div className="mt-3 flex items-center gap-3">
-          {back && (
-            <button
-              onClick={() => setActiveProduct(undefined)}
-              className="group -ml-1 flex items-center gap-1 rounded-md border border-ink-600 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-300 transition-all hover:border-cyan-400/50 hover:text-cyan-300"
-            >
-              <IcArrow className="rotate-180 transition-transform group-hover:-translate-x-0.5" />
-              вся витрина
-            </button>
-          )}
-          <h2 className="text-3xl font-semibold tracking-tight text-ink-50 sm:text-4xl">
-            {back ? "Честный Выбор" : "Честная витрина"}
-          </h2>
-        </div>
-        <p className="mt-2 max-w-xl text-sm text-ink-300">
-          {back ? (
-            <>
-              Запрос:{" "}
-              <span className="font-mono text-cyan-200">
-                «{query || "самые дешёвые AirPods Pro 3"}»
-              </span>
-            </>
-          ) : (
-            <>
-              Агент отобрал позиции под запрос{" "}
-              <span className="font-mono text-cyan-200">«{query}»</span> — у каждой
-              категории свой формат подачи, математика кэшбека везде одинаково открыта.
-            </>
-          )}
-        </p>
+    <motion.button
+      initial={{ opacity: 0, y: 22 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.09, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
+      onClick={onOpen}
+      className={`group relative overflow-hidden rounded-[20px] border-[1.5px] border-ink-50 bg-ink-800 text-left shadow-[4px_4px_0_#211b14] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[7px_7px_0_#211b14] ${style.cls}`}
+    >
+      <div className="relative h-44 overflow-hidden md:h-full">
+        <MediaImg
+          src={p.image}
+          alt={p.name}
+          icon={<IcTag />}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+        />
+        <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border-[1.5px] border-ink-50 bg-paper px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-ink-200 shadow-[2px_2px_0_#211b14]">
+          {style.icon}
+          {style.label}
+        </span>
       </div>
-      <AgentBadge agent="product" />
-    </div>
-  );
-}
 
-/* ================================================================
-   ВИТРИНА — разные представления товаров
-   ================================================================ */
-
-function MiniSpark({ data }: { data: number[] }) {
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const pts = data
-    .map((v, i) => `${(i / (data.length - 1)) * 100},${30 - ((v - min) / (max - min)) * 26}`)
-    .join(" ");
-  return (
-    <svg viewBox="0 0 100 32" preserveAspectRatio="none" className="h-8 w-full">
-      <polyline points={pts} fill="none" stroke="#67e8f9" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function Catalog({ products }: { products: ProductPayload[] }) {
-  const setActiveProduct = useAuraStore((s) => s.setActiveProduct);
-  const pushToast = useAuraStore((s) => s.pushToast);
-  const by = (id: string) => products.find((p) => p.id === id)!;
-  const audio = by("airpods-pro-3");
-  const sneak = by("asics-kayano-31");
-  const vac = by("roborock-s8");
-  const tv = by("lg-oled-c4");
-
-  const open = (p: ProductPayload) => {
-    setActiveProduct(p.id);
-    pushToast(`Открываю досье: ${p.name}`, "cyan");
-  };
-
-  const cardCls =
-    "group relative overflow-hidden rounded-xl border border-ink-700 bg-ink-800/70 text-left transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-[0_20px_60px_-24px_rgba(103,232,249,0.5)]";
-
-  return (
-    <div className="mt-6 grid gap-4 md:grid-cols-12">
-      {/* --- аудио: широкая горизонтальная --- */}
-      <motion.button
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        onClick={() => open(audio)}
-        className={`${cardCls} md:col-span-7`}
-      >
-        <div className="grid sm:grid-cols-[220px_1fr]">
-          <MediaImg src={audio.image} alt={audio.name} icon={<IcTag />} className="h-40 w-full object-cover sm:h-full" />
-          <div className="p-5">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-                {audio.category}
-              </span>
-              <span className="rounded border border-cyan-400/40 bg-cyan-400/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-cyan-300">
-                выбор агента
-              </span>
-            </div>
-            <h3 className="mt-2 text-xl font-semibold text-ink-50">{audio.name}</h3>
-            <div className="mt-3 flex flex-wrap items-baseline gap-3">
-              <span className="font-mono text-sm text-ink-400 line-through">
-                {fmtRub(audio.market_cheapest.price)}
-              </span>
-              <span className="font-mono text-2xl font-bold text-cyan-300">
-                {fmtRub(audio.partner.final)}
-              </span>
-              <span className="rounded bg-cyan-400/15 px-2 py-0.5 font-mono text-[10px] text-cyan-200">
-                −{fmtRub(audio.savings_vs_market)} от пола
-              </span>
-            </div>
-            <p className="mt-2 text-[11.5px] text-ink-400">
-              {audio.marketplaces_scanned} источников · кэшбек {pct(audio.partner.cashback_rate)} · официально
+      <div className="flex flex-1 flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="font-display text-[16px] font-semibold leading-tight text-ink-50">
+              {p.name}
+            </h3>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-400">
+              {p.category}
             </p>
           </div>
-        </div>
-      </motion.button>
-
-      {/* --- кроссовки: вертикальная с размерной сеткой --- */}
-      <motion.button
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.08 }}
-        onClick={() => open(sneak)}
-        className={`${cardCls} flex flex-col md:col-span-5`}
-      >
-        <MediaImg src={sneak.image} alt={sneak.name} icon={<IcTag />} className="h-36 w-full object-cover" />
-        <div className="flex flex-1 flex-col p-5">
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-            {sneak.category}
+          <span className="shrink-0 -rotate-2 rounded-[10px] border-[1.5px] border-ink-50 bg-[#12857a] px-2 py-1 font-mono text-[10px] font-bold text-paper shadow-[2px_2px_0_#211b14]">
+            −{fmtInt(p.savings_vs_market)} ₽
           </span>
-          <h3 className="mt-2 text-xl font-semibold text-ink-50">{sneak.name}</h3>
-          <div className="mt-3 flex items-center gap-1.5">
-            {sneak.extras?.colors?.map((c) => (
-              <span
-                key={c.name}
-                className="h-3.5 w-3.5 rounded-full border border-ink-500"
-                style={{ background: c.hex }}
-                title={c.name}
-              />
-            ))}
-            <span className="ml-1 font-mono text-[10px] text-ink-500">3 расцветки</span>
-          </div>
+        </div>
+
+        {p.layout === "audio" && (
+          <p className="mt-3 text-[12.5px] leading-relaxed text-ink-300">
+            Рыночный пол {fmtRub(p.market_cheapest.price)} — серый импорт.
+            Партнёр + кэшбек {fmtRub(p.partner.cashback)} выходит дешевле, с
+            официальной гарантией. Вся математика внутри.
+          </p>
+        )}
+
+        {p.layout === "sneakers" && p.extras && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {sneak.extras?.sizes?.map((s) => {
-              const out = sneak.extras?.out?.includes(s);
+            {p.extras.sizes!.map((s) => {
+              const out = p.extras!.out!.includes(s);
               return (
                 <span
                   key={s}
-                  className={`rounded border px-2 py-0.5 font-mono text-[10px] ${
+                  className={`rounded-md border-[1.5px] px-2 py-0.5 font-mono text-[10.5px] font-bold transition-colors ${
                     out
-                      ? "border-ink-700 text-ink-500 line-through"
-                      : "border-ink-600 text-ink-300"
+                      ? "border-ink-600 text-ink-500 line-through"
+                      : "border-ink-50 bg-paper text-ink-200 group-hover:border-[#12857a] group-hover:text-[#0e6e62]"
                   }`}
                 >
                   {s}
@@ -248,600 +180,94 @@ function Catalog({ products }: { products: ProductPayload[] }) {
               );
             })}
           </div>
-          <div className="mt-auto flex items-baseline gap-3 pt-4">
-            <span className="font-mono text-sm text-ink-400 line-through">
-              {fmtRub(sneak.market_cheapest.price)}
-            </span>
-            <span className="font-mono text-xl font-bold text-cyan-300">
-              {fmtRub(sneak.partner.final)}
-            </span>
-          </div>
-        </div>
-      </motion.button>
+        )}
 
-      {/* --- пылесос: компактная со спеками --- */}
-      <motion.button
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.14 }}
-        onClick={() => open(vac)}
-        className={`${cardCls} md:col-span-5`}
-      >
-        <div className="grid grid-cols-[110px_1fr] gap-4 p-5">
-          <MediaImg src={vac.image} alt={vac.name} icon={<IcVacuum />} className="h-full w-full rounded-lg object-cover" />
-          <div>
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-              {vac.category}
-            </span>
-            <h3 className="mt-1.5 text-lg font-semibold text-ink-50">{vac.name}</h3>
-            <ul className="mt-2.5 space-y-1">
-              {vac.extras?.specs?.slice(0, 3).map(([k, v]) => (
-                <li key={k} className="flex justify-between gap-3 font-mono text-[10.5px]">
-                  <span className="text-ink-500">{k}</span>
-                  <span className="text-right text-ink-300">{v}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-3 flex items-baseline gap-2.5">
-              <span className="font-mono text-xs text-ink-400 line-through">
-                {fmtRub(vac.market_cheapest.price)}
-              </span>
-              <span className="font-mono text-lg font-bold text-cyan-300">
-                {fmtRub(vac.partner.final)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.button>
-
-      {/* --- ТВ: график тренда + «дно близко» --- */}
-      <motion.button
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        onClick={() => open(tv)}
-        className={`${cardCls} md:col-span-7`}
-      >
-        <div className="grid sm:grid-cols-[200px_1fr]">
-          <MediaImg src={tv.image} alt={tv.name} icon={<IcTv />} className="h-36 w-full object-cover sm:h-full" />
-          <div className="p-5">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-                {tv.category}
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-amber-300">
-                <span className="dot-live h-1.5 w-1.5 rounded-full bg-amber-300" />
-                дно близко · {tv.extras?.meter}%
-              </span>
-            </div>
-            <h3 className="mt-2 text-xl font-semibold text-ink-50">{tv.name}</h3>
-            <div className="mt-2">
-              <MiniSpark data={tv.price_index_90d} />
-            </div>
-            <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              <span className="font-mono text-sm text-ink-400 line-through">
-                {fmtRub(tv.market_cheapest.price)}
-              </span>
-              <span className="font-mono text-2xl font-bold text-cyan-300">
-                {fmtRub(tv.partner.final)}
-              </span>
-              <span className="font-mono text-[10.5px] text-ink-400">
-                {tv.extras?.weeks_down} недель цена падает · монтаж в подарок
-              </span>
-            </div>
-          </div>
-        </div>
-      </motion.button>
-    </div>
-  );
-}
-
-/* ================================================================
-   ДЕТАЛЬНОЕ ДОСЬЕ
-   ================================================================ */
-
-const TRACE_STEPS = [
-  "Намерение разобрано · категория зафиксирована",
-  "Сканируем {n} маркетплейсов и индексы цен…",
-  "Кэшбек-маршруты рассчитаны · CPA-офферы",
-  "Честный рейтинг готов · рыночный пол vs партнёр",
-];
-
-function Detail({
-  product,
-  claimed,
-  orderId,
-}: {
-  product: ProductPayload;
-  claimed: boolean;
-  orderId?: string;
-}) {
-  const patchActive = useAuraStore((s) => s.patchActive);
-  const pushToast = useAuraStore((s) => s.pushToast);
-  const [step, setStep] = useState(0);
-  const [claiming, setClaiming] = useState(false);
-  const [size, setSize] = useState<string | null>(null);
-  const [colorIdx, setColorIdx] = useState(0);
-  const [sizeShake, setSizeShake] = useState(0);
-
-  useEffect(() => {
-    setStep(0);
-    const id = window.setInterval(
-      () => setStep((s) => (s < TRACE_STEPS.length ? s + 1 : s)),
-      560
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  const ready = step >= TRACE_STEPS.length;
-  const p = product.partner;
-  const m = product.market_cheapest;
-
-  function claim() {
-    if (claimed || claiming) return;
-    if (product.extras?.sizes && !size) {
-      setSizeShake((x) => x + 1);
-      pushToast("Сначала выберите размер — без него заказ не собрать", "amber");
-      return;
-    }
-    setClaiming(true);
-    setTimeout(() => {
-      setClaiming(false);
-      patchActive({ claimed: true, orderId: newOrderId() });
-      pushToast(`Кэшбек ${fmtRub(p.cashback)} зачислен в Aura-кошелёк`, "cyan");
-    }, 1100);
-  }
-
-  return (
-    <div className="mt-6 grid gap-5 lg:grid-cols-12">
-      {/* ------- левая колонка: работа агента ------- */}
-      <div className="flex flex-col gap-5 lg:col-span-5">
-        <Panel className="p-5">
-          <div className="flex items-center justify-between">
-            <SectionLabel>трассировка агента</SectionLabel>
-            <LiveDot />
-          </div>
-          <ul className="mt-4 space-y-3">
-            {TRACE_STEPS.map((raw, i) => {
-              const s = raw.replace("{n}", String(product.marketplaces_scanned));
-              const done = step > i;
-              const current = step === i;
-              return (
-                <li key={s} className="flex items-start gap-3 text-[13px]">
-                  <span
-                    className={`mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border text-[9px] transition-all duration-300 ${
-                      done
-                        ? "border-cyan-300 bg-cyan-400/20 text-cyan-300"
-                        : current
-                          ? "border-cyan-400/50 text-cyan-300"
-                          : "border-ink-600 text-ink-500"
-                    }`}
-                  >
-                    {done ? (
-                      <IcCheck />
-                    ) : current ? (
-                      <span className="dot-live inline-block h-1.5 w-1.5 rounded-full bg-cyan-300" />
-                    ) : (
-                      i + 1
-                    )}
-                  </span>
-                  <span
-                    className={`transition-colors duration-300 ${
-                      done ? "text-ink-100" : current ? "text-cyan-200" : "text-ink-500"
-                    }`}
-                  >
-                    {s}
-                    {current && (
-                      <span className="caret ml-1 inline-block h-3 w-[6px] translate-y-0.5 bg-cyan-300" />
-                    )}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionLabel>индекс цены · 90 дней</SectionLabel>
-          <div className="mt-3">
-            <Sparkline data={product.price_index_90d} active={ready} />
-          </div>
-          <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-ink-400">
-            <span>−90 дн</span>
-            <span className="text-cyan-300">
-              дно {fmtRub(Math.min(...product.price_index_90d))}
-            </span>
-            <span>сегодня</span>
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
-          <SectionLabel>реестр доверия</SectionLabel>
-          <ul className="mt-3 divide-y divide-ink-700">
-            {product.trust_ledger.map((row) => (
-              <li key={row.label} className="flex items-center justify-between gap-4 py-2.5 text-xs">
-                <span className="text-ink-300">{row.label}</span>
-                <span
-                  className={`text-right font-mono ${
-                    row.tone === "good"
-                      ? "text-cyan-300"
-                      : row.tone === "bad"
-                        ? "text-red-400"
-                        : "text-ink-200"
-                  }`}
-                >
-                  {row.value}
-                </span>
+        {p.layout === "appliance" && p.extras && (
+          <ul className="mt-3 space-y-1">
+            {p.extras.specs!.slice(0, 2).map(([k, v]) => (
+              <li key={k} className="flex justify-between gap-3 text-[11.5px]">
+                <span className="text-ink-400">{k}</span>
+                <span className="font-mono text-ink-200">{v}</span>
               </li>
             ))}
+            <li className="flex justify-between gap-3 pt-1 text-[11.5px]">
+              <span className="text-ink-400">офферов сравнено</span>
+              <span className="font-mono font-bold text-[#0e6e62]">
+                {p.extras.alt_offers!.length + 1} · партнёр выигрывает
+              </span>
+            </li>
           </ul>
-          <p className="mt-3 border-t border-ink-700 pt-3 font-mono text-[10px] text-ink-500">
-            {product.cashback_source}
-          </p>
-        </Panel>
+        )}
+
+        {p.layout === "tv" && p.extras && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-ink-400">
+              <span>момент покупки</span>
+              <span className="font-bold text-[#0e6e62]">{p.extras.meter}%</span>
+            </div>
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full border border-ink-600 bg-ink-900">
+              <motion.div
+                initial={{ width: 0 }}
+                whileInView={{ width: `${p.extras.meter}%` }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.1, ease: "easeOut" }}
+                className="h-full rounded-full bg-gradient-to-r from-[#12857a] to-[#1b9c8d]"
+              />
+            </div>
+            <p className="mt-2 text-[11.5px] text-ink-300">
+              цена {p.extras.weeks_down} недель подряд вниз — дно близко
+            </p>
+          </div>
+        )}
+
+        <div className="mt-auto flex items-center justify-between pt-4">
+          <PriceTag p={p} />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-ink-50 bg-paper text-ink-100 shadow-[2px_2px_0_#211b14] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-[#12857a] group-hover:text-paper">
+            <IcArrow />
+          </span>
+        </div>
       </div>
-
-      {/* ------- правая колонка: досье товара ------- */}
-      <div className="lg:col-span-7">
-        <Panel className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-ink-700 px-5 py-3.5">
-            <div className="flex items-center gap-3">
-              <AgentBadge agent="product" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">
-                честный выбор
-              </span>
-            </div>
-            <span className="rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-cyan-300">
-              кэшбек-маршрут найден
-            </span>
-          </div>
-
-          <div className="grid sm:grid-cols-[200px_1fr]">
-            <MediaImg
-              src={product.image}
-              alt={product.name}
-              icon={<IcTag />}
-              className="h-44 w-full object-cover sm:h-full"
-            />
-            <div className="p-5">
-              <h3 className="text-2xl font-semibold tracking-tight text-ink-50">
-                {product.name}
-              </h3>
-              <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">
-                {product.category} · {product.marketplaces_scanned} источников
-              </p>
-
-              {/* ------- специфичная для категории подача ------- */}
-              {product.layout === "sneakers" && product.extras && (
-                <SneakersBody
-                  extras={product.extras}
-                  size={size}
-                  setSize={setSize}
-                  colorIdx={colorIdx}
-                  setColorIdx={setColorIdx}
-                  shake={sizeShake}
-                />
-              )}
-              {product.layout === "appliance" && product.extras && (
-                <ApplianceBody extras={product.extras} market={m} partnerFinal={p.final} partner={p.retailer} />
-              )}
-              {product.layout === "tv" && product.extras && <TvBody extras={product.extras} active={ready} />}
-            </div>
-          </div>
-
-          {/* ------- A против B ------- */}
-          <div className="grid gap-4 p-5 sm:grid-cols-2">
-            <div className="rounded-lg border border-ink-700 bg-ink-850/60 p-4 opacity-75">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-                  вариант A · рыночный пол
-                </span>
-                <span className="rounded border border-ink-600 px-1.5 py-0.5 font-mono text-[9px] uppercase text-ink-400">
-                  сырой минимум
-                </span>
-              </div>
-              <p className="mt-3 text-sm text-ink-200">{m.retailer}</p>
-              <p className="mt-1 font-mono text-2xl text-ink-200 line-through decoration-ink-500/60 decoration-2">
-                {fmtRub(m.price)}
-              </p>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-ink-400">
-                <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{m.delivery}</li>
-                <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{m.warranty}</li>
-                <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{m.returns}</li>
-              </ul>
-            </div>
-
-            <div className="relative rounded-lg border border-cyan-400/40 bg-cyan-400/[0.06] p-4 shadow-[0_0_40px_-14px_rgba(103,232,249,0.5)]">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-300">
-                  вариант B · выбор Aura
-                </span>
-                <span className="rounded border border-cyan-400/40 bg-cyan-400/15 px-1.5 py-0.5 font-mono text-[9px] uppercase text-cyan-200">
-                  −{fmtRub(product.savings_vs_market)} от пола
-                </span>
-              </div>
-              <p className="mt-3 text-sm text-ink-100">{p.retailer}</p>
-              <ul className="mt-3 space-y-1.5 text-[11px] text-ink-300">
-                <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{p.delivery}</li>
-                <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{p.warranty}</li>
-                <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{p.returns}</li>
-              </ul>
-            </div>
-          </div>
-
-          {/* ------- математика ------- */}
-          <div className="mx-5 mb-5 rounded-lg border border-ink-700 bg-ink-950/60 p-5">
-            <SectionLabel>математика — открыто</SectionLabel>
-            <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono">
-              <span className="text-lg text-ink-200">
-                <Money value={p.price} active={ready} />
-              </span>
-              <span className="text-ink-500">−</span>
-              <span className="text-lg text-cyan-300">
-                <Money value={p.cashback} active={ready} duration={1100} />
-              </span>
-              <span className="text-ink-500">=</span>
-              <span className="text-3xl font-bold text-ink-50">
-                <Money value={p.final} active={ready} duration={1300} />
-              </span>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-              <span className="rounded bg-cyan-400/15 px-2 py-1 font-mono text-cyan-200">
-                {pct(p.cashback_rate)} мгновенного кэшбека
-              </span>
-              <span className="text-ink-400">
-                дешевле рыночного пола на{" "}
-                <span className="font-mono text-cyan-300">{fmtRub(product.savings_vs_market)}</span>{" "}
-                — и с официальной гарантией.
-              </span>
-            </div>
-          </div>
-
-          {/* ------- действия ------- */}
-          <div className="border-t border-ink-700 px-5 py-4">
-            <AnimatePresence mode="wait">
-              {claimed ? (
-                <motion.div
-                  key="done"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-wrap items-center gap-4"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-400/15 text-lg text-cyan-300">
-                    <IcCheck />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-ink-50">
-                      Заказ <span className="font-mono text-cyan-300">{orderId}</span> создан
-                    </p>
-                    <p className="mt-0.5 text-xs text-ink-300">
-                      {fmtRub(p.cashback)} в Aura-кошельке
-                      {size ? ` · размер ${size}` : ""} · {p.delivery.toLowerCase()}
-                    </p>
-                  </div>
-                  <span className="ml-auto inline-flex items-center gap-2 rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] text-ink-300">
-                    <IcShield className="text-cyan-300" /> серийник в очереди на проверку
-                  </span>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="cta"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  className="flex flex-col gap-3 sm:flex-row sm:items-center"
-                >
-                  <button
-                    onClick={claim}
-                    disabled={claiming}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-300 px-5 py-3 text-sm font-semibold text-ink-950 transition-all duration-200 hover:bg-cyan-200 hover:shadow-[0_0_30px_-6px_rgba(103,232,249,0.8)] active:scale-[0.98] disabled:opacity-70"
-                  >
-                    {claiming ? (
-                      <>
-                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
-                        Фиксируем маршрут…
-                      </>
-                    ) : (
-                      <>
-                        <IcWallet /> Забрать кэшбек и купить
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() =>
-                      pushToast("Открываем маркетплейс — кэшбек не применится", "slate")
-                    }
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-ink-600 px-5 py-3 text-sm text-ink-300 transition-all duration-200 hover:border-ink-400 hover:text-ink-100"
-                  >
-                    Купить без кэшбека <IcArrow className="text-ink-500" />
-                  </button>
-                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-500 sm:ml-auto">
-                    выплата · мгновенно
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </Panel>
-      </div>
-    </div>
+    </motion.button>
   );
 }
 
-/* ---------------- категории: разная подача ---------------- */
-
-function SneakersBody({
-  extras,
-  size,
-  setSize,
-  colorIdx,
-  setColorIdx,
-  shake,
+function Showcase({
+  products,
+  onOpen,
+  query,
 }: {
-  extras: NonNullable<ProductPayload["extras"]>;
-  size: string | null;
-  setSize: (s: string) => void;
-  colorIdx: number;
-  setColorIdx: (i: number) => void;
-  shake: number;
+  products: ProductPayload[];
+  onOpen: (id: string) => void;
+  query: string;
 }) {
   return (
-    <div className="mt-4 rounded-lg border border-ink-700 bg-ink-950/50 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-          расцветка
-        </span>
-        {extras.colors?.map((c, i) => (
-          <button
-            key={c.name}
-            onClick={() => setColorIdx(i)}
-            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-all ${
-              i === colorIdx
-                ? "border-cyan-400/60 bg-cyan-400/10 text-cyan-200"
-                : "border-ink-600 text-ink-300 hover:border-ink-400"
-            }`}
-          >
-            <span className="h-2.5 w-2.5 rounded-full border border-ink-500" style={{ background: c.hex }} />
-            {c.name}
-          </button>
+    <div data-accent="cyan">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <SectionLabel>сессия 0426 / агент товаров</SectionLabel>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink-50 sm:text-4xl">
+            Честная витрина
+          </h2>
+          <p className="mt-2 max-w-xl text-sm text-ink-300">
+            Запрос: <span className="font-mono text-cyan-200">«{query || "что сегодня выгодно взять"}»</span>{" "}
+            — агент отобрал 4 позиции, где кэшбек бьёт рыночное дно.
+          </p>
+        </div>
+        <AgentBadge agent="product" />
+      </div>
+
+      <div className="mt-6 grid gap-5 md:grid-cols-2">
+        {products.map((p, i) => (
+          <ProductCard key={p.id} p={p} i={i} onOpen={() => onOpen(p.id)} />
         ))}
       </div>
-      <motion.div
-        key={shake}
-        animate={shake ? { x: [0, -7, 7, -4, 4, 0] } : { x: 0 }}
-        transition={{ duration: 0.35 }}
-        className="mt-3"
-      >
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-          размер EU
-        </span>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {extras.sizes?.map((s) => {
-            const out = extras.out?.includes(s);
-            const sel = size === s;
-            return (
-              <button
-                key={s}
-                disabled={out}
-                onClick={() => setSize(s)}
-                className={`min-w-11 rounded-md border px-2.5 py-1.5 font-mono text-xs transition-all duration-150 ${
-                  out
-                    ? "cursor-not-allowed border-ink-700 text-ink-500 line-through opacity-60"
-                    : sel
-                      ? "border-cyan-300 bg-cyan-400/15 text-cyan-200 shadow-[0_0_16px_-4px_rgba(103,232,249,0.7)]"
-                      : "border-ink-600 text-ink-200 hover:border-cyan-400/50 hover:text-cyan-200"
-                }`}
-              >
-                {s}
-              </button>
-            );
-          })}
-        </div>
-        {size && (
-          <p className="mt-2 font-mono text-[10.5px] text-cyan-300">
-            размер {size} · в наличии у партнёра
-          </p>
-        )}
-      </motion.div>
     </div>
   );
 }
 
-function ApplianceBody({
-  extras,
-  market,
-  partnerFinal,
-  partner,
-}: {
-  extras: NonNullable<ProductPayload["extras"]>;
-  market: { retailer: string; price: number };
-  partnerFinal: number;
-  partner: string;
-}) {
-  return (
-    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-      <div className="rounded-lg border border-ink-700 bg-ink-950/50 p-3.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-          ключевые спеки
-        </span>
-        <ul className="mt-2 space-y-1.5">
-          {extras.specs?.map(([k, v]) => (
-            <li key={k} className="flex justify-between gap-3 text-[11.5px]">
-              <span className="text-ink-500">{k}</span>
-              <span className="text-right text-ink-200">{v}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="rounded-lg border border-ink-700 bg-ink-950/50 p-3.5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-          предложения на рынке
-        </span>
-        <ul className="mt-2 space-y-2">
-          <li className="flex items-center justify-between gap-2 text-[11.5px] text-ink-400">
-            <span className="truncate">{market.retailer}</span>
-            <span className="font-mono line-through">{fmtRub(market.price)}</span>
-          </li>
-          {extras.alt_offers?.map((o) => (
-            <li key={o.retailer}>
-              <div className="flex items-center justify-between gap-2 text-[11.5px] text-ink-300">
-                <span className="truncate">{o.retailer}</span>
-                <span className="font-mono">{fmtRub(o.price)}</span>
-              </div>
-              <p className="font-mono text-[9.5px] text-ink-500">{o.note}</p>
-            </li>
-          ))}
-          <li className="flex items-center justify-between gap-2 border-t border-ink-700 pt-2 text-[11.5px]">
-            <span className="text-cyan-300">{partner}</span>
-            <span className="font-mono font-bold text-cyan-300">{fmtRub(partnerFinal)}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function TvBody({
-  extras,
-  active,
-}: {
-  extras: NonNullable<ProductPayload["extras"]>;
-  active: boolean;
-}) {
-  const meter = extras.meter ?? 0;
-  return (
-    <div className="mt-4 flex items-center gap-5 rounded-lg border border-amber-400/25 bg-amber-400/[0.04] p-4">
-      <svg viewBox="0 0 120 68" className="w-28 shrink-0">
-        <path d="M12,60 A48,48 0 0 1 108,60" fill="none" stroke="#262b3a" strokeWidth="8" strokeLinecap="round" />
-        <motion.path
-          d="M12,60 A48,48 0 0 1 108,60"
-          fill="none"
-          stroke="#fbbf24"
-          strokeWidth="8"
-          strokeLinecap="round"
-          pathLength={1}
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: active ? meter / 100 : 0 }}
-          transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
-        />
-        <text x="60" y="52" textAnchor="middle" className="fill-amber-300 font-mono" fontSize="20" fontWeight="700">
-          {meter}%
-        </text>
-      </svg>
-      <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-300">
-          индекс момента покупки
-        </p>
-        <p className="mt-1.5 text-[13px] font-semibold text-ink-100">{extras.verdict}</p>
-        <p className="mt-1 text-[11px] text-ink-400">
-          цена снижается {extras.weeks_down} недель подряд · партнёр добавляет монтаж в подарок
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------- график ---------------- */
+/* ============================================================
+   Детальный разбор товара
+   ============================================================ */
 function Sparkline({ data, active }: { data: number[]; active: boolean }) {
   const w = 320;
   const h = 96;
@@ -858,8 +284,8 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full">
       <defs>
         <linearGradient id="sp" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#67e8f9" stopOpacity="0.22" />
-          <stop offset="100%" stopColor="#67e8f9" stopOpacity="0" />
+          <stop offset="0%" stopColor="#12857a" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#12857a" stopOpacity="0" />
         </linearGradient>
       </defs>
       <motion.path
@@ -867,13 +293,13 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
         fill="url(#sp)"
         initial={{ opacity: 0 }}
         animate={{ opacity: active ? 1 : 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
+        transition={{ delay: 0.8, duration: 0.8 }}
       />
       <motion.path
         d={d}
         fill="none"
-        stroke="#67e8f9"
-        strokeWidth="2"
+        stroke="#12857a"
+        strokeWidth="2.4"
         strokeLinecap="round"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: active ? 1 : 0 }}
@@ -882,12 +308,582 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
       <motion.circle
         cx={last[0]}
         cy={last[1]}
-        r="4"
-        fill="#67e8f9"
+        r="4.5"
+        fill="#12857a"
+        stroke="#fdf9ef"
+        strokeWidth="2"
         initial={{ opacity: 0 }}
         animate={{ opacity: active ? 1 : 0 }}
         transition={{ delay: 1.2 }}
       />
     </svg>
+  );
+}
+
+function Gauge({ value, active }: { value: number; active: boolean }) {
+  const R = 52;
+  const C = Math.PI * R;
+  return (
+    <div className="relative h-[72px] w-[124px]">
+      <svg viewBox="0 0 124 72" className="h-full w-full">
+        <path d={`M10 66 A ${R} ${R} 0 0 1 114 66`} fill="none" stroke="#e8dfc9" strokeWidth="10" strokeLinecap="round" />
+        <motion.path
+          d={`M10 66 A ${R} ${R} 0 0 1 114 66`}
+          fill="none"
+          stroke="#12857a"
+          strokeWidth="10"
+          strokeLinecap="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: active ? value / 100 : 0 }}
+          transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
+        />
+      </svg>
+      <span className="absolute inset-x-0 bottom-0 text-center font-mono text-lg font-bold text-ink-50">
+        <Money value={value} active={active} />
+        <span className="text-xs">%</span>
+      </span>
+    </div>
+  );
+}
+
+function ProductDetail({
+  p,
+  onBack,
+  claimed,
+  onClaimed,
+}: {
+  p: ProductPayload;
+  onBack: () => void;
+  claimed?: boolean;
+  onClaimed: () => void;
+}) {
+  const pushToast = useAuraStore((s) => s.pushToast);
+  const { phase, scanned } = useAgentPhase(true, p.id);
+  const done = phase >= PHASES.length;
+
+  const [size, setSize] = useState<string | null>(null);
+  const [color, setColor] = useState(0);
+  const [claiming, setClaiming] = useState(false);
+  const [order, setOrder] = useState<string | null>(claimed ? "AUR-РАНЕЕ" : null);
+  const [shakeSize, setShakeSize] = useState(0);
+
+  const partner = p.partner;
+  const market = p.market_cheapest;
+
+  function claim() {
+    if (claiming || order) return;
+    if (p.layout === "sneakers" && !size) {
+      setShakeSize((s) => s + 1);
+      pushToast("Сначала выберите размер — без него заказ не оформить", "amber");
+      return;
+    }
+    setClaiming(true);
+    setTimeout(() => {
+      setClaiming(false);
+      setOrder(newOrderId());
+      onClaimed();
+      pushToast(`Кэшбек ${fmtRub(partner.cashback)} зачислен в Aura-кошелёк`, "cyan");
+    }, 1100);
+  }
+
+  const cmpRows: [string, string, string, boolean?][] = [
+    ["Цена на полке", fmtRub(market.price), fmtRub(partner.price)],
+    ["Кэшбек Aura", "—", `−${fmtRub(partner.cashback)}`],
+    ["Итоговая цена", fmtRub(market.price), fmtRub(partner.final), true],
+    ["Гарантия", market.warranty, partner.warranty],
+    ["Доставка", market.delivery, partner.delivery],
+    ["Возврат", market.returns, partner.returns],
+  ];
+
+  return (
+    <div data-accent="cyan">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="sticker flex h-9 w-9 items-center justify-center rounded-[12px] bg-paper text-ink-100"
+            aria-label="Назад к витрине"
+          >
+            <IcChevron className="rotate-180" />
+          </button>
+          <div>
+            <SectionLabel>агент товаров / детальный разбор</SectionLabel>
+            <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink-50 sm:text-3xl">
+              {p.name}
+            </h2>
+          </div>
+        </div>
+        <AgentBadge agent="product" />
+      </div>
+
+      <div className="mt-6 grid gap-5 lg:grid-cols-12">
+        {/* ---- левая колонка: следы работы агента ---- */}
+        <div className="flex flex-col gap-5 lg:col-span-5">
+          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+            <div className="flex items-center justify-between">
+              <SectionLabel>следы работы агента</SectionLabel>
+              <LiveDot />
+            </div>
+            <ul className="mt-4 space-y-3">
+              {PHASES.map((s, i) => {
+                const isDone = phase > i;
+                const current = phase === i;
+                return (
+                  <li key={s.label} className="flex items-start gap-3 text-[13px]">
+                    <span
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[9px] font-bold transition-all duration-300 ${
+                        isDone
+                          ? "border-ink-50 bg-[#12857a] text-paper"
+                          : current
+                            ? "border-[#12857a] text-[#12857a]"
+                            : "border-ink-600 text-ink-500"
+                      }`}
+                    >
+                      {isDone ? <IcCheck /> : i + 1}
+                    </span>
+                    <span
+                      className={`transition-colors duration-300 ${
+                        isDone ? "text-ink-100" : current ? "font-semibold text-[#0e6e62]" : "text-ink-500"
+                      }`}
+                    >
+                      {s.label}
+                      {i === 2 && current && (
+                        <span className="ml-2 font-mono text-[11px] text-[#12857a]">
+                          {scanned}/14
+                        </span>
+                      )}
+                      {current && (
+                        <span className="caret ml-1.5 inline-block h-3 w-[6px] translate-y-0.5 bg-[#12857a]" />
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </Panel>
+
+          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+            <SectionLabel>индекс цены · 90 дней</SectionLabel>
+            <div className="mt-3">
+              <Sparkline data={p.price_index_90d} active={done} />
+            </div>
+            <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-ink-400">
+              <span>−90 дней</span>
+              <span className="font-bold text-[#0e6e62]">
+                дно {fmtRub(Math.min(...p.price_index_90d))}
+              </span>
+              <span>сегодня</span>
+            </div>
+          </Panel>
+
+          {p.extras?.meter !== undefined && (
+            <Panel className="flex items-center justify-between rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+              <div>
+                <SectionLabel>индекс момента покупки</SectionLabel>
+                <p className="mt-2 max-w-[220px] text-[12px] leading-relaxed text-ink-300">
+                  {p.extras.verdict}
+                </p>
+              </div>
+              <Gauge value={p.extras.meter} active={done} />
+            </Panel>
+          )}
+
+          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+            <SectionLabel>журнал доверия</SectionLabel>
+            <ul className="mt-3 divide-y divide-ink-700">
+              {p.trust_ledger.map((row, i) => (
+                <motion.li
+                  key={row.label}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={done ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center justify-between gap-4 py-2.5 text-xs"
+                >
+                  <span className="text-ink-300">{row.label}</span>
+                  <span
+                    className={`text-right font-mono ${
+                      row.tone === "good"
+                        ? "font-bold text-[#0e6e62]"
+                        : row.tone === "bad"
+                          ? "font-bold text-red-400"
+                          : "text-ink-200"
+                    }`}
+                  >
+                    {row.value}
+                  </span>
+                </motion.li>
+              ))}
+            </ul>
+            <p className="mt-3 border-t border-ink-700 pt-3 font-mono text-[10px] text-ink-400">
+              {p.cashback_source}
+            </p>
+          </Panel>
+        </div>
+
+        {/* ---- правая колонка: честный выбор ---- */}
+        <div className="lg:col-span-7">
+          <motion.div
+            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            animate={phase >= 2 ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <Panel className="overflow-hidden rounded-[22px] border-[1.5px] border-ink-50 shadow-[5px_5px_0_#211b14]">
+              <div className="flex items-center justify-between border-b border-ink-700 px-5 py-3.5">
+                <div className="flex items-center gap-3">
+                  <AgentBadge agent="product" />
+                  <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-400">
+                    честный выбор
+                  </span>
+                </div>
+                <span className="rounded-md border-[1.5px] border-ink-50 bg-[#12857a] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-paper shadow-[2px_2px_0_#211b14]">
+                  кэшбек найден
+                </span>
+              </div>
+
+              <div className="grid sm:grid-cols-[210px_1fr]">
+                <MediaImg
+                  src={p.image}
+                  alt={p.name}
+                  icon={<IcTag />}
+                  className="h-44 w-full object-cover sm:h-full"
+                />
+                <div className="p-5">
+                  <h3 className="font-display text-xl font-semibold text-ink-50">{p.name}</h3>
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-400">
+                    {p.category} · источников: {p.marketplaces_scanned}
+                  </p>
+
+                  {/* вариант для кроссовок: цвет + размер */}
+                  {p.layout === "sneakers" && p.extras && (
+                    <div className="mt-4">
+                      <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
+                        цвет: <span className="text-ink-200">{p.extras.colors![color].name}</span>
+                      </p>
+                      <div className="mt-1.5 flex gap-2">
+                        {p.extras.colors!.map((c, i) => (
+                          <button
+                            key={c.name}
+                            onClick={() => setColor(i)}
+                            className={`h-7 w-7 rounded-full border-[1.5px] transition-all ${
+                              i === color ? "border-ink-50 shadow-[2px_2px_0_#211b14]" : "border-ink-600 opacity-60 hover:opacity-100"
+                            }`}
+                            style={{ background: c.hex }}
+                            aria-label={c.name}
+                          />
+                        ))}
+                      </div>
+                      <motion.div animate={shakeSize ? { x: [0, -7, 7, -4, 4, 0] } : {}} key={shakeSize}>
+                        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
+                          размер (EU):
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {p.extras.sizes!.map((s) => {
+                            const out = p.extras!.out!.includes(s);
+                            return (
+                              <button
+                                key={s}
+                                disabled={out}
+                                onClick={() => setSize(s)}
+                                className={`rounded-lg border-[1.5px] px-2.5 py-1 font-mono text-[11.5px] font-bold transition-all ${
+                                  out
+                                    ? "cursor-not-allowed border-ink-700 text-ink-500 line-through"
+                                    : size === s
+                                      ? "border-ink-50 bg-[#12857a] text-paper shadow-[2px_2px_0_#211b14]"
+                                      : "border-ink-50 bg-paper text-ink-200 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_#211b14]"
+                                }`}
+                              >
+                                {s}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {p.extras.out!.length > 0 && (
+                          <p className="mt-1.5 font-mono text-[9.5px] text-ink-400">
+                            зачёркнутые размеры закончились у партнёра
+                          </p>
+                        )}
+                      </motion.div>
+                    </div>
+                  )}
+
+                  {/* спеки для техники */}
+                  {p.layout === "appliance" && p.extras && (
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {p.extras.specs!.map(([k, v]) => (
+                        <div key={k} className="rounded-lg border border-ink-700 bg-ink-900 px-2.5 py-1.5">
+                          <p className="font-mono text-[9px] uppercase tracking-wider text-ink-400">{k}</p>
+                          <p className="mt-0.5 text-[11.5px] font-semibold text-ink-100">{v}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="mt-4 text-[12.5px] leading-relaxed text-ink-300">
+                    Самый дешёвый «сырой» вариант — {market.retailer.toLowerCase()} с
+                    оговорками. Партнёрский маршрут на бумаге дороже, а по факту —
+                    дешевле: кэшбек падает в кошелёк сразу.
+                  </p>
+                </div>
+              </div>
+
+              {/* A против B */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={phase >= 5 ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5 }}
+                className="relative grid gap-4 p-5 pt-1 sm:grid-cols-2"
+              >
+                <div className="rounded-[16px] border-[1.5px] border-dashed border-ink-500 bg-ink-900/60 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
+                      вариант A · рыночный пол
+                    </span>
+                    <span className="rounded border border-ink-600 px-1.5 py-0.5 font-mono text-[9px] uppercase text-ink-400">
+                      просто дешевле
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-ink-200">{market.retailer}</p>
+                  <p className="mt-1 font-mono text-2xl font-bold text-ink-300 line-through decoration-red-400/70 decoration-2">
+                    {fmtRub(market.price)}
+                  </p>
+                  <ul className="mt-3 space-y-1.5 text-[11px] text-ink-400">
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.delivery}</li>
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.warranty}</li>
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.returns}</li>
+                  </ul>
+                </div>
+
+                <div className="relative rounded-[16px] border-2 border-[#12857a] bg-[#12857a]/8 p-4 shadow-[4px_4px_0_#12857a]">
+                  <span className="absolute -right-2.5 -top-3 rotate-3 rounded-[10px] border-[1.5px] border-ink-50 bg-[#e8a33d] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-50 shadow-[2px_2px_0_#211b14]">
+                    выгода −{fmtInt(p.savings_vs_market)} ₽
+                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#0e6e62]">
+                      вариант B · выбор Aura
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-ink-100">{partner.retailer}</p>
+                  <ul className="mt-3 space-y-1.5 text-[11px] text-ink-300">
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.delivery}</li>
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.warranty}</li>
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.returns}</li>
+                  </ul>
+                </div>
+              </motion.div>
+
+              {/* математика */}
+              <motion.div
+                initial={{ opacity: 0, y: 14 }}
+                animate={done ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="mx-5 mb-5 rounded-[16px] border-[1.5px] border-ink-50 bg-paper p-5 shadow-[3px_3px_0_#211b14]"
+              >
+                <SectionLabel>математика начистоту</SectionLabel>
+                <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono">
+                  <span className="text-lg font-semibold text-ink-200">
+                    <Money value={partner.price} active={done} />
+                  </span>
+                  <span className="text-ink-400">−</span>
+                  <span className="text-lg font-semibold text-[#12857a]">
+                    <Money value={partner.cashback} active={done} duration={1100} />
+                  </span>
+                  <span className="text-ink-400">=</span>
+                  <span className="text-3xl font-bold text-ink-50">
+                    <Money value={partner.final} active={done} duration={1300} />
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="rounded-full bg-[#12857a]/12 px-2.5 py-1 font-mono font-bold text-[#0e6e62]">
+                    кэшбек {pct(partner.cashback_rate)} сразу
+                  </span>
+                  <span className="text-ink-400">
+                    дешевле рыночного пола на{" "}
+                    <span className="font-mono font-bold text-[#0e6e62]">{fmtRub(p.savings_vs_market)}</span>{" "}
+                    — с официальной гарантией.
+                  </span>
+                </div>
+              </motion.div>
+
+              {/* таблица сравнения */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={done ? { opacity: 1 } : {}}
+                transition={{ delay: 0.35 }}
+                className="mx-5 mb-5 overflow-hidden rounded-[14px] border border-ink-700"
+              >
+                <table className="w-full text-left text-[12px]">
+                  <thead>
+                    <tr className="border-b border-ink-700 bg-ink-900 font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-400">
+                      <th className="px-3.5 py-2 font-medium">критерий</th>
+                      <th className="px-3.5 py-2 font-medium">A · {market.retailer}</th>
+                      <th className="px-3.5 py-2 font-medium text-[#0e6e62]">B · Aura</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cmpRows.map(([k, a, b, hl]) => (
+                      <tr
+                        key={k}
+                        className={`border-b border-ink-700/70 last:border-0 ${
+                          hl ? "bg-[#12857a]/10 font-bold" : ""
+                        }`}
+                      >
+                        <td className="px-3.5 py-2 text-ink-300">{k}</td>
+                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-ink-300 line-through" : "text-ink-200"}`}>{a}</td>
+                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-base text-[#0e6e62]" : "text-ink-100"}`}>{b}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </motion.div>
+
+              {/* альтернативные офферы */}
+              {p.extras?.alt_offers && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={done ? { opacity: 1 } : {}}
+                  transition={{ delay: 0.45 }}
+                  className="mx-5 mb-5"
+                >
+                  <SectionLabel>что ещё видел агент</SectionLabel>
+                  <ul className="mt-2.5 space-y-1.5">
+                    {p.extras.alt_offers.map((o) => (
+                      <li key={o.retailer} className="flex items-center justify-between rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[11.5px]">
+                        <span className="font-semibold text-ink-200">{o.retailer}</span>
+                        <span className="font-mono text-ink-300">{fmtRub(o.price)}</span>
+                        <span className="text-ink-400">{o.note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+
+              {/* действия */}
+              <div className="border-t border-ink-700 px-5 py-4">
+                <AnimatePresence mode="wait">
+                  {order ? (
+                    <motion.div
+                      key="done"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex flex-wrap items-center gap-4"
+                    >
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-ink-50 bg-[#12857a] text-lg text-paper shadow-[2px_2px_0_#211b14]">
+                        <IcCheck />
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-ink-50">
+                          Заказ <span className="font-mono text-[#0e6e62]">{order}</span> создан
+                        </p>
+                        <p className="mt-0.5 text-xs text-ink-300">
+                          {fmtRub(partner.cashback)} в Aura-кошельке · {partner.delivery}
+                        </p>
+                      </div>
+                      <span className="ml-auto inline-flex items-center gap-2 rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] text-ink-300">
+                        <IcShield className="text-[#12857a]" /> серийник в очереди на проверку
+                      </span>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="cta"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className="flex flex-col gap-3 sm:flex-row sm:items-center"
+                    >
+                      <button
+                        onClick={claim}
+                        disabled={claiming}
+                        className="sticker inline-flex items-center justify-center gap-2 rounded-[14px] bg-[#12857a] px-5 py-3 text-sm font-bold text-paper disabled:opacity-70"
+                      >
+                        {claiming ? (
+                          <>
+                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-paper/40 border-t-paper" />
+                            Фиксирую маршрут…
+                          </>
+                        ) : (
+                          <>
+                            <IcWallet /> Забрать кэшбек и купить
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() =>
+                          pushToast("Открываю маркетплейс без кэшбека — так дороже на " + fmtRub(p.savings_vs_market), "slate")
+                        }
+                        className="inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-ink-600 px-5 py-3 text-sm font-semibold text-ink-300 transition-all hover:border-ink-400 hover:text-ink-100"
+                      >
+                        Купить без кэшбека <IcArrow className="text-ink-500" />
+                      </button>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400 sm:ml-auto">
+                        выплата · мгновенно
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </Panel>
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Комната товаров: витрина + детали
+   ============================================================ */
+export function ProductRoom() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+  const setActiveProduct = useAuraStore((s) => s.setActiveProduct);
+  const patchActive = useAuraStore((s) => s.patchActive);
+  const query = useAuraStore((s) => s.query);
+  const sessions = useAuraStore((s) => s.sessions);
+  const activeId = useAuraStore((s) => s.activeId);
+
+  const products = useMemo(() => data ?? [], [data]);
+  const session = sessions.find((x) => x.id === activeId);
+  const active = products.find((p) => p.id === session?.productId);
+
+  if (isLoading) {
+    return (
+      <div data-accent="cyan">
+        <SectionLabel>сессия 0426 / агент товаров</SectionLabel>
+        <h2 className="mt-3 font-display text-3xl font-bold text-ink-50">Честная витрина</h2>
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-64 rounded-[20px] border-[1.5px] border-ink-50 bg-ink-800 p-6 shadow-[4px_4px_0_#211b14]"
+              style={{ ["--acc-rgb" as string]: "18 133 122" }}
+            >
+              <div className="shimmer-bar h-4 w-40 rounded" />
+              <div className="mt-6 space-y-3">
+                {[100, 84, 66].map((w, j) => (
+                  <div key={j} className="h-3 rounded-full bg-ink-700" style={{ width: `${w}%` }} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 flex items-center gap-2 font-mono text-xs font-semibold text-[#0e6e62]">
+          <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-[#12857a]" />
+          агент товаров сканирует 14 источников…
+        </p>
+      </div>
+    );
+  }
+
+  return active ? (
+    <ProductDetail
+      p={active}
+      onBack={() => setActiveProduct(undefined)}
+      claimed={session?.claimed}
+      onClaimed={() => patchActive({ claimed: true })}
+    />
+  ) : (
+    <Showcase products={products} onOpen={(id) => setActiveProduct(id)} query={query} />
   );
 }
