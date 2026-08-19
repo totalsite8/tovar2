@@ -29,15 +29,14 @@ import {
 } from "../shared/icons";
 
 /* ============================================================
-   Медленный, логичный таймлайн работы агента
+   Таймлайн работы агента (постепенный, как живой поиск)
    ============================================================ */
 const PHASES = [
   { at: 0, label: "Разбираю запрос…" },
-  { at: 1100, label: "Категория зафиксирована" },
-  { at: 2200, label: "Сканирую маркетплейсы и индексы цен…" },
-  { at: 4200, label: "Торгуюсь за кэшбек-маршруты…" },
-  { at: 5400, label: "Строю честный рейтинг…" },
-  { at: 6600, label: "Готово — показываю математику" },
+  { at: 900, label: "Категория зафиксирована" },
+  { at: 1900, label: "Сканирую маркетплейсы и индексы цен…" },
+  { at: 3200, label: "Торгуюсь за кэшбек-маршруты…" },
+  { at: 4300, label: "Готово — показываю математику" },
 ];
 
 function useAgentPhase(ready: boolean, key: string) {
@@ -47,17 +46,16 @@ function useAgentPhase(ready: boolean, key: string) {
     if (!ready) return;
     setPhase(0);
     setScanned(0);
+    const t0 = performance.now();
     const ts = PHASES.map((p, i) =>
       window.setTimeout(() => setPhase(i + 1), p.at)
     );
     const scanStart = PHASES[2].at;
     const iv = window.setInterval(() => {
-      const el = performance.now() - t0;
-      if (el > scanStart) {
+      if (performance.now() - t0 > scanStart) {
         setScanned((s) => Math.min(14, s + 1));
       }
-    }, 130);
-    const t0 = performance.now();
+    }, 150);
     return () => {
       ts.forEach(clearTimeout);
       clearInterval(iv);
@@ -67,7 +65,7 @@ function useAgentPhase(ready: boolean, key: string) {
 }
 
 /* ============================================================
-   Витрина: 4 товара, 4 разных формата карточек
+   Витрина: 4 товара — 4 разных формата карточек
    ============================================================ */
 const CARD_STYLES: Record<
   string,
@@ -124,7 +122,7 @@ function ProductCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: i * 0.09, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
       onClick={onOpen}
-      className={`group relative overflow-hidden rounded-[20px] border-[1.5px] border-ink-50 bg-ink-800 text-left shadow-[4px_4px_0_#211b14] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[7px_7px_0_#211b14] ${style.cls}`}
+      className={`group relative overflow-hidden rounded-xl border border-ink-700 bg-ink-800 text-left transition-all duration-300 hover:-translate-y-1 hover:border-ink-500 hover:shadow-[0_20px_50px_-20px_rgba(103,232,249,0.35)] ${style.cls}`}
     >
       <div className="relative h-44 overflow-hidden md:h-full">
         <MediaImg
@@ -133,7 +131,7 @@ function ProductCard({
           icon={<IcTag />}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
         />
-        <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border-[1.5px] border-ink-50 bg-paper px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-ink-200 shadow-[2px_2px_0_#211b14]">
+        <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full border border-ink-600 bg-ink-950/80 px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider text-cyan-300 backdrop-blur-sm">
           {style.icon}
           {style.label}
         </span>
@@ -142,14 +140,14 @@ function ProductCard({
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="font-display text-[16px] font-semibold leading-tight text-ink-50">
+            <h3 className="text-[16px] font-semibold leading-tight text-ink-50">
               {p.name}
             </h3>
             <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-ink-400">
               {p.category}
             </p>
           </div>
-          <span className="shrink-0 -rotate-2 rounded-[10px] border-[1.5px] border-ink-50 bg-[#12857a] px-2 py-1 font-mono text-[10px] font-bold text-paper shadow-[2px_2px_0_#211b14]">
+          <span className="shrink-0 rounded-md border border-cyan-400/40 bg-cyan-400/10 px-2 py-1 font-mono text-[10px] font-bold text-cyan-300">
             −{fmtInt(p.savings_vs_market)} ₽
           </span>
         </div>
@@ -169,10 +167,10 @@ function ProductCard({
               return (
                 <span
                   key={s}
-                  className={`rounded-md border-[1.5px] px-2 py-0.5 font-mono text-[10.5px] font-bold transition-colors ${
+                  className={`rounded-md border px-2 py-0.5 font-mono text-[10.5px] font-bold ${
                     out
-                      ? "border-ink-600 text-ink-500 line-through"
-                      : "border-ink-50 bg-paper text-ink-200 group-hover:border-[#12857a] group-hover:text-[#0e6e62]"
+                      ? "border-ink-700 text-ink-500 line-through"
+                      : "border-ink-600 text-ink-200 group-hover:border-cyan-400/50 group-hover:text-cyan-200"
                   }`}
                 >
                   {s}
@@ -192,7 +190,7 @@ function ProductCard({
             ))}
             <li className="flex justify-between gap-3 pt-1 text-[11.5px]">
               <span className="text-ink-400">офферов сравнено</span>
-              <span className="font-mono font-bold text-[#0e6e62]">
+              <span className="font-mono font-bold text-cyan-300">
                 {p.extras.alt_offers!.length + 1} · партнёр выигрывает
               </span>
             </li>
@@ -203,15 +201,15 @@ function ProductCard({
           <div className="mt-3">
             <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-ink-400">
               <span>момент покупки</span>
-              <span className="font-bold text-[#0e6e62]">{p.extras.meter}%</span>
+              <span className="font-bold text-cyan-300">{p.extras.meter}%</span>
             </div>
-            <div className="mt-1.5 h-2 overflow-hidden rounded-full border border-ink-600 bg-ink-900">
+            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink-700">
               <motion.div
                 initial={{ width: 0 }}
                 whileInView={{ width: `${p.extras.meter}%` }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.1, ease: "easeOut" }}
-                className="h-full rounded-full bg-gradient-to-r from-[#12857a] to-[#1b9c8d]"
+                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-cyan-300"
               />
             </div>
             <p className="mt-2 text-[11.5px] text-ink-300">
@@ -222,7 +220,7 @@ function ProductCard({
 
         <div className="mt-auto flex items-center justify-between pt-4">
           <PriceTag p={p} />
-          <span className="flex h-8 w-8 items-center justify-center rounded-full border-[1.5px] border-ink-50 bg-paper text-ink-100 shadow-[2px_2px_0_#211b14] transition-all duration-300 group-hover:translate-x-1 group-hover:bg-[#12857a] group-hover:text-paper">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full border border-ink-600 text-ink-300 transition-all duration-300 group-hover:translate-x-1 group-hover:border-cyan-400/50 group-hover:bg-cyan-400/10 group-hover:text-cyan-300">
             <IcArrow />
           </span>
         </div>
@@ -245,11 +243,14 @@ function Showcase({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <SectionLabel>сессия 0426 / агент товаров</SectionLabel>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-ink-50 sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink-50 sm:text-4xl">
             Честная витрина
           </h2>
           <p className="mt-2 max-w-xl text-sm text-ink-300">
-            Запрос: <span className="font-mono text-cyan-200">«{query || "что сегодня выгодно взять"}»</span>{" "}
+            Запрос:{" "}
+            <span className="font-mono text-cyan-200">
+              «{query || "что сегодня выгодно взять"}»
+            </span>{" "}
             — агент отобрал 4 позиции, где кэшбек бьёт рыночное дно.
           </p>
         </div>
@@ -284,8 +285,8 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full">
       <defs>
         <linearGradient id="sp" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#12857a" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#12857a" stopOpacity="0" />
+          <stop offset="0%" stopColor="#67e8f9" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#67e8f9" stopOpacity="0" />
         </linearGradient>
       </defs>
       <motion.path
@@ -298,8 +299,8 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
       <motion.path
         d={d}
         fill="none"
-        stroke="#12857a"
-        strokeWidth="2.4"
+        stroke="#67e8f9"
+        strokeWidth="2"
         strokeLinecap="round"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: active ? 1 : 0 }}
@@ -308,10 +309,8 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
       <motion.circle
         cx={last[0]}
         cy={last[1]}
-        r="4.5"
-        fill="#12857a"
-        stroke="#fdf9ef"
-        strokeWidth="2"
+        r="4"
+        fill="#67e8f9"
         initial={{ opacity: 0 }}
         animate={{ opacity: active ? 1 : 0 }}
         transition={{ delay: 1.2 }}
@@ -322,15 +321,14 @@ function Sparkline({ data, active }: { data: number[]; active: boolean }) {
 
 function Gauge({ value, active }: { value: number; active: boolean }) {
   const R = 52;
-  const C = Math.PI * R;
   return (
     <div className="relative h-[72px] w-[124px]">
       <svg viewBox="0 0 124 72" className="h-full w-full">
-        <path d={`M10 66 A ${R} ${R} 0 0 1 114 66`} fill="none" stroke="#e8dfc9" strokeWidth="10" strokeLinecap="round" />
+        <path d={`M10 66 A ${R} ${R} 0 0 1 114 66`} fill="none" stroke="#1b1f2b" strokeWidth="10" strokeLinecap="round" />
         <motion.path
           d={`M10 66 A ${R} ${R} 0 0 1 114 66`}
           fill="none"
-          stroke="#12857a"
+          stroke="#67e8f9"
           strokeWidth="10"
           strokeLinecap="round"
           initial={{ pathLength: 0 }}
@@ -401,14 +399,14 @@ function ProductDetail({
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="sticker flex h-9 w-9 items-center justify-center rounded-[12px] bg-paper text-ink-100"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-ink-600 text-ink-200 transition-all hover:border-cyan-400/50 hover:text-cyan-300"
             aria-label="Назад к витрине"
           >
             <IcChevron className="rotate-180" />
           </button>
           <div>
             <SectionLabel>агент товаров / детальный разбор</SectionLabel>
-            <h2 className="mt-1 font-display text-2xl font-bold tracking-tight text-ink-50 sm:text-3xl">
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink-50 sm:text-3xl">
               {p.name}
             </h2>
           </div>
@@ -417,9 +415,9 @@ function ProductDetail({
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-12">
-        {/* ---- левая колонка: следы работы агента ---- */}
+        {/* ---- слева: следы работы агента ---- */}
         <div className="flex flex-col gap-5 lg:col-span-5">
-          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+          <Panel className="p-5">
             <div className="flex items-center justify-between">
               <SectionLabel>следы работы агента</SectionLabel>
               <LiveDot />
@@ -431,11 +429,11 @@ function ProductDetail({
                 return (
                   <li key={s.label} className="flex items-start gap-3 text-[13px]">
                     <span
-                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[9px] font-bold transition-all duration-300 ${
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[9px] transition-all duration-300 ${
                         isDone
-                          ? "border-ink-50 bg-[#12857a] text-paper"
+                          ? "border-cyan-300 bg-cyan-400/20 text-cyan-300"
                           : current
-                            ? "border-[#12857a] text-[#12857a]"
+                            ? "border-cyan-400/50 text-cyan-300"
                             : "border-ink-600 text-ink-500"
                       }`}
                     >
@@ -443,17 +441,17 @@ function ProductDetail({
                     </span>
                     <span
                       className={`transition-colors duration-300 ${
-                        isDone ? "text-ink-100" : current ? "font-semibold text-[#0e6e62]" : "text-ink-500"
+                        isDone ? "text-ink-100" : current ? "text-cyan-200" : "text-ink-500"
                       }`}
                     >
                       {s.label}
                       {i === 2 && current && (
-                        <span className="ml-2 font-mono text-[11px] text-[#12857a]">
+                        <span className="ml-2 font-mono text-[11px] text-cyan-300">
                           {scanned}/14
                         </span>
                       )}
                       {current && (
-                        <span className="caret ml-1.5 inline-block h-3 w-[6px] translate-y-0.5 bg-[#12857a]" />
+                        <span className="caret ml-1.5 inline-block h-3 w-[6px] translate-y-0.5 bg-cyan-300" />
                       )}
                     </span>
                   </li>
@@ -462,14 +460,14 @@ function ProductDetail({
             </ul>
           </Panel>
 
-          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+          <Panel className="p-5">
             <SectionLabel>индекс цены · 90 дней</SectionLabel>
             <div className="mt-3">
               <Sparkline data={p.price_index_90d} active={done} />
             </div>
             <div className="mt-1 flex items-center justify-between font-mono text-[10px] text-ink-400">
               <span>−90 дней</span>
-              <span className="font-bold text-[#0e6e62]">
+              <span className="text-cyan-300">
                 дно {fmtRub(Math.min(...p.price_index_90d))}
               </span>
               <span>сегодня</span>
@@ -477,7 +475,7 @@ function ProductDetail({
           </Panel>
 
           {p.extras?.meter !== undefined && (
-            <Panel className="flex items-center justify-between rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+            <Panel className="flex items-center justify-between p-5">
               <div>
                 <SectionLabel>индекс момента покупки</SectionLabel>
                 <p className="mt-2 max-w-[220px] text-[12px] leading-relaxed text-ink-300">
@@ -488,7 +486,7 @@ function ProductDetail({
             </Panel>
           )}
 
-          <Panel className="rounded-[20px] border-[1.5px] border-ink-50 p-5 shadow-[4px_4px_0_#211b14]">
+          <Panel className="p-5">
             <SectionLabel>журнал доверия</SectionLabel>
             <ul className="mt-3 divide-y divide-ink-700">
               {p.trust_ledger.map((row, i) => (
@@ -503,9 +501,9 @@ function ProductDetail({
                   <span
                     className={`text-right font-mono ${
                       row.tone === "good"
-                        ? "font-bold text-[#0e6e62]"
+                        ? "text-cyan-300"
                         : row.tone === "bad"
-                          ? "font-bold text-red-400"
+                          ? "text-red-400"
                           : "text-ink-200"
                     }`}
                   >
@@ -514,20 +512,20 @@ function ProductDetail({
                 </motion.li>
               ))}
             </ul>
-            <p className="mt-3 border-t border-ink-700 pt-3 font-mono text-[10px] text-ink-400">
+            <p className="mt-3 border-t border-ink-700 pt-3 font-mono text-[10px] text-ink-500">
               {p.cashback_source}
             </p>
           </Panel>
         </div>
 
-        {/* ---- правая колонка: честный выбор ---- */}
+        {/* ---- справа: честный выбор ---- */}
         <div className="lg:col-span-7">
           <motion.div
             initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
             animate={phase >= 2 ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
             transition={{ duration: 0.6 }}
           >
-            <Panel className="overflow-hidden rounded-[22px] border-[1.5px] border-ink-50 shadow-[5px_5px_0_#211b14]">
+            <Panel className="overflow-hidden">
               <div className="flex items-center justify-between border-b border-ink-700 px-5 py-3.5">
                 <div className="flex items-center gap-3">
                   <AgentBadge agent="product" />
@@ -535,7 +533,7 @@ function ProductDetail({
                     честный выбор
                   </span>
                 </div>
-                <span className="rounded-md border-[1.5px] border-ink-50 bg-[#12857a] px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-paper shadow-[2px_2px_0_#211b14]">
+                <span className="rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-cyan-300">
                   кэшбек найден
                 </span>
               </div>
@@ -548,12 +546,11 @@ function ProductDetail({
                   className="h-44 w-full object-cover sm:h-full"
                 />
                 <div className="p-5">
-                  <h3 className="font-display text-xl font-semibold text-ink-50">{p.name}</h3>
+                  <h3 className="text-xl font-semibold text-ink-50">{p.name}</h3>
                   <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.16em] text-ink-400">
                     {p.category} · источников: {p.marketplaces_scanned}
                   </p>
 
-                  {/* вариант для кроссовок: цвет + размер */}
                   {p.layout === "sneakers" && p.extras && (
                     <div className="mt-4">
                       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
@@ -564,8 +561,8 @@ function ProductDetail({
                           <button
                             key={c.name}
                             onClick={() => setColor(i)}
-                            className={`h-7 w-7 rounded-full border-[1.5px] transition-all ${
-                              i === color ? "border-ink-50 shadow-[2px_2px_0_#211b14]" : "border-ink-600 opacity-60 hover:opacity-100"
+                            className={`h-7 w-7 rounded-full border transition-all ${
+                              i === color ? "border-cyan-300 ring-2 ring-cyan-400/30" : "border-ink-600 opacity-60 hover:opacity-100"
                             }`}
                             style={{ background: c.hex }}
                             aria-label={c.name}
@@ -584,12 +581,12 @@ function ProductDetail({
                                 key={s}
                                 disabled={out}
                                 onClick={() => setSize(s)}
-                                className={`rounded-lg border-[1.5px] px-2.5 py-1 font-mono text-[11.5px] font-bold transition-all ${
+                                className={`rounded-md border px-2.5 py-1 font-mono text-[11.5px] font-bold transition-all ${
                                   out
                                     ? "cursor-not-allowed border-ink-700 text-ink-500 line-through"
                                     : size === s
-                                      ? "border-ink-50 bg-[#12857a] text-paper shadow-[2px_2px_0_#211b14]"
-                                      : "border-ink-50 bg-paper text-ink-200 hover:-translate-y-0.5 hover:shadow-[2px_2px_0_#211b14]"
+                                      ? "border-cyan-300 bg-cyan-400/20 text-cyan-200"
+                                      : "border-ink-600 text-ink-200 hover:border-cyan-400/50 hover:text-cyan-200"
                                 }`}
                               >
                                 {s}
@@ -598,7 +595,7 @@ function ProductDetail({
                           })}
                         </div>
                         {p.extras.out!.length > 0 && (
-                          <p className="mt-1.5 font-mono text-[9.5px] text-ink-400">
+                          <p className="mt-1.5 font-mono text-[9.5px] text-ink-500">
                             зачёркнутые размеры закончились у партнёра
                           </p>
                         )}
@@ -606,12 +603,11 @@ function ProductDetail({
                     </div>
                   )}
 
-                  {/* спеки для техники */}
                   {p.layout === "appliance" && p.extras && (
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       {p.extras.specs!.map(([k, v]) => (
-                        <div key={k} className="rounded-lg border border-ink-700 bg-ink-900 px-2.5 py-1.5">
-                          <p className="font-mono text-[9px] uppercase tracking-wider text-ink-400">{k}</p>
+                        <div key={k} className="rounded-md border border-ink-700 bg-ink-850 px-2.5 py-1.5">
+                          <p className="font-mono text-[9px] uppercase tracking-wider text-ink-500">{k}</p>
                           <p className="mt-0.5 text-[11.5px] font-semibold text-ink-100">{v}</p>
                         </div>
                       ))}
@@ -629,11 +625,11 @@ function ProductDetail({
               {/* A против B */}
               <motion.div
                 initial={{ opacity: 0, y: 14 }}
-                animate={phase >= 5 ? { opacity: 1, y: 0 } : {}}
+                animate={phase >= 4 ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5 }}
                 className="relative grid gap-4 p-5 pt-1 sm:grid-cols-2"
               >
-                <div className="rounded-[16px] border-[1.5px] border-dashed border-ink-500 bg-ink-900/60 p-4">
+                <div className="rounded-lg border border-ink-700 border-dashed bg-ink-850/60 p-4 opacity-80">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
                       вариант A · рыночный пол
@@ -642,31 +638,29 @@ function ProductDetail({
                       просто дешевле
                     </span>
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-ink-200">{market.retailer}</p>
-                  <p className="mt-1 font-mono text-2xl font-bold text-ink-300 line-through decoration-red-400/70 decoration-2">
+                  <p className="mt-3 text-sm text-ink-200">{market.retailer}</p>
+                  <p className="mt-1 font-mono text-2xl text-ink-200 line-through decoration-ink-500/60 decoration-2">
                     {fmtRub(market.price)}
                   </p>
                   <ul className="mt-3 space-y-1.5 text-[11px] text-ink-400">
-                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.delivery}</li>
-                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.warranty}</li>
-                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400" />{market.returns}</li>
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{market.delivery}</li>
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{market.warranty}</li>
+                    <li className="flex gap-2"><IcX className="mt-0.5 shrink-0 text-red-400/80" />{market.returns}</li>
                   </ul>
                 </div>
 
-                <div className="relative rounded-[16px] border-2 border-[#12857a] bg-[#12857a]/8 p-4 shadow-[4px_4px_0_#12857a]">
-                  <span className="absolute -right-2.5 -top-3 rotate-3 rounded-[10px] border-[1.5px] border-ink-50 bg-[#e8a33d] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-50 shadow-[2px_2px_0_#211b14]">
-                    выгода −{fmtInt(p.savings_vs_market)} ₽
+                <div className="relative rounded-lg border border-cyan-400/40 bg-cyan-400/[0.06] p-4 shadow-[0_0_40px_-14px_rgba(103,232,249,0.5)]">
+                  <span className="absolute -right-2 -top-2.5 rounded-md border border-cyan-300/50 bg-ink-950 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-cyan-300">
+                    −{fmtInt(p.savings_vs_market)} ₽ vs пол
                   </span>
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#0e6e62]">
-                      вариант B · выбор Aura
-                    </span>
-                  </div>
-                  <p className="mt-3 text-sm font-semibold text-ink-100">{partner.retailer}</p>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-cyan-300">
+                    вариант B · выбор Aura
+                  </span>
+                  <p className="mt-3 text-sm text-ink-100">{partner.retailer}</p>
                   <ul className="mt-3 space-y-1.5 text-[11px] text-ink-300">
-                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.delivery}</li>
-                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.warranty}</li>
-                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-[#12857a]" />{partner.returns}</li>
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{partner.delivery}</li>
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{partner.warranty}</li>
+                    <li className="flex gap-2"><IcCheck className="mt-0.5 shrink-0 text-cyan-300" />{partner.returns}</li>
                   </ul>
                 </div>
               </motion.div>
@@ -676,29 +670,29 @@ function ProductDetail({
                 initial={{ opacity: 0, y: 14 }}
                 animate={done ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.15 }}
-                className="mx-5 mb-5 rounded-[16px] border-[1.5px] border-ink-50 bg-paper p-5 shadow-[3px_3px_0_#211b14]"
+                className="mx-5 mb-5 rounded-lg border border-ink-700 bg-ink-950/60 p-5"
               >
                 <SectionLabel>математика начистоту</SectionLabel>
                 <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 font-mono">
-                  <span className="text-lg font-semibold text-ink-200">
+                  <span className="text-lg text-ink-200">
                     <Money value={partner.price} active={done} />
                   </span>
-                  <span className="text-ink-400">−</span>
-                  <span className="text-lg font-semibold text-[#12857a]">
+                  <span className="text-ink-500">−</span>
+                  <span className="text-lg text-cyan-300">
                     <Money value={partner.cashback} active={done} duration={1100} />
                   </span>
-                  <span className="text-ink-400">=</span>
+                  <span className="text-ink-500">=</span>
                   <span className="text-3xl font-bold text-ink-50">
                     <Money value={partner.final} active={done} duration={1300} />
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-                  <span className="rounded-full bg-[#12857a]/12 px-2.5 py-1 font-mono font-bold text-[#0e6e62]">
+                  <span className="rounded bg-cyan-400/15 px-2 py-1 font-mono text-cyan-200">
                     кэшбек {pct(partner.cashback_rate)} сразу
                   </span>
                   <span className="text-ink-400">
                     дешевле рыночного пола на{" "}
-                    <span className="font-mono font-bold text-[#0e6e62]">{fmtRub(p.savings_vs_market)}</span>{" "}
+                    <span className="font-mono text-cyan-300">{fmtRub(p.savings_vs_market)}</span>{" "}
                     — с официальной гарантией.
                   </span>
                 </div>
@@ -709,14 +703,14 @@ function ProductDetail({
                 initial={{ opacity: 0 }}
                 animate={done ? { opacity: 1 } : {}}
                 transition={{ delay: 0.35 }}
-                className="mx-5 mb-5 overflow-hidden rounded-[14px] border border-ink-700"
+                className="mx-5 mb-5 overflow-x-auto rounded-lg border border-ink-700"
               >
-                <table className="w-full text-left text-[12px]">
+                <table className="w-full min-w-[480px] text-left text-[12px]">
                   <thead>
-                    <tr className="border-b border-ink-700 bg-ink-900 font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-400">
+                    <tr className="border-b border-ink-700 bg-ink-850 font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-400">
                       <th className="px-3.5 py-2 font-medium">критерий</th>
                       <th className="px-3.5 py-2 font-medium">A · {market.retailer}</th>
-                      <th className="px-3.5 py-2 font-medium text-[#0e6e62]">B · Aura</th>
+                      <th className="px-3.5 py-2 font-medium text-cyan-300">B · Aura</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -724,12 +718,12 @@ function ProductDetail({
                       <tr
                         key={k}
                         className={`border-b border-ink-700/70 last:border-0 ${
-                          hl ? "bg-[#12857a]/10 font-bold" : ""
+                          hl ? "bg-cyan-400/[0.07] font-bold" : ""
                         }`}
                       >
                         <td className="px-3.5 py-2 text-ink-300">{k}</td>
-                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-ink-300 line-through" : "text-ink-200"}`}>{a}</td>
-                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-base text-[#0e6e62]" : "text-ink-100"}`}>{b}</td>
+                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-ink-400 line-through" : "text-ink-200"}`}>{a}</td>
+                        <td className={`px-3.5 py-2 font-mono ${hl ? "text-base text-cyan-300" : "text-ink-100"}`}>{b}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -747,7 +741,7 @@ function ProductDetail({
                   <SectionLabel>что ещё видел агент</SectionLabel>
                   <ul className="mt-2.5 space-y-1.5">
                     {p.extras.alt_offers.map((o) => (
-                      <li key={o.retailer} className="flex items-center justify-between rounded-lg border border-ink-700 bg-ink-900 px-3 py-2 text-[11.5px]">
+                      <li key={o.retailer} className="flex items-center justify-between rounded-md border border-ink-700 bg-ink-850 px-3 py-2 text-[11.5px]">
                         <span className="font-semibold text-ink-200">{o.retailer}</span>
                         <span className="font-mono text-ink-300">{fmtRub(o.price)}</span>
                         <span className="text-ink-400">{o.note}</span>
@@ -767,19 +761,19 @@ function ProductDetail({
                       animate={{ opacity: 1, y: 0 }}
                       className="flex flex-wrap items-center gap-4"
                     >
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full border-[1.5px] border-ink-50 bg-[#12857a] text-lg text-paper shadow-[2px_2px_0_#211b14]">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-cyan-300/50 bg-cyan-400/15 text-lg text-cyan-300">
                         <IcCheck />
                       </span>
                       <div>
-                        <p className="text-sm font-bold text-ink-50">
-                          Заказ <span className="font-mono text-[#0e6e62]">{order}</span> создан
+                        <p className="text-sm font-semibold text-ink-50">
+                          Заказ <span className="font-mono text-cyan-300">{order}</span> создан
                         </p>
                         <p className="mt-0.5 text-xs text-ink-300">
                           {fmtRub(partner.cashback)} в Aura-кошельке · {partner.delivery}
                         </p>
                       </div>
                       <span className="ml-auto inline-flex items-center gap-2 rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] text-ink-300">
-                        <IcShield className="text-[#12857a]" /> серийник в очереди на проверку
+                        <IcShield className="text-cyan-300" /> серийник в очереди на проверку
                       </span>
                     </motion.div>
                   ) : (
@@ -793,11 +787,11 @@ function ProductDetail({
                       <button
                         onClick={claim}
                         disabled={claiming}
-                        className="sticker inline-flex items-center justify-center gap-2 rounded-[14px] bg-[#12857a] px-5 py-3 text-sm font-bold text-paper disabled:opacity-70"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-300 px-5 py-3 text-sm font-semibold text-ink-950 transition-all duration-200 hover:bg-cyan-200 hover:shadow-[0_0_30px_-6px_rgba(103,232,249,0.8)] active:scale-[0.98] disabled:opacity-70"
                       >
                         {claiming ? (
                           <>
-                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-paper/40 border-t-paper" />
+                            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink-950/30 border-t-ink-950" />
                             Фиксирую маршрут…
                           </>
                         ) : (
@@ -808,13 +802,16 @@ function ProductDetail({
                       </button>
                       <button
                         onClick={() =>
-                          pushToast("Открываю маркетплейс без кэшбека — так дороже на " + fmtRub(p.savings_vs_market), "slate")
+                          pushToast(
+                            "Открываю маркетплейс без кэшбека — так дороже на " + fmtRub(p.savings_vs_market),
+                            "slate"
+                          )
                         }
-                        className="inline-flex items-center justify-center gap-2 rounded-[14px] border-[1.5px] border-ink-600 px-5 py-3 text-sm font-semibold text-ink-300 transition-all hover:border-ink-400 hover:text-ink-100"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-ink-600 px-5 py-3 text-sm text-ink-300 transition-all hover:border-ink-400 hover:text-ink-100"
                       >
                         Купить без кэшбека <IcArrow className="text-ink-500" />
                       </button>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400 sm:ml-auto">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-500 sm:ml-auto">
                         выплата · мгновенно
                       </span>
                     </motion.div>
@@ -830,46 +827,46 @@ function ProductDetail({
 }
 
 /* ============================================================
-   Комната товаров: витрина + детали
+   Комната товаров: витрина + детали (состояние в сессии)
    ============================================================ */
 export function ProductRoom() {
   const { data, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
-  const setActiveProduct = useAuraStore((s) => s.setActiveProduct);
-  const patchActive = useAuraStore((s) => s.patchActive);
   const query = useAuraStore((s) => s.query);
   const sessions = useAuraStore((s) => s.sessions);
   const activeId = useAuraStore((s) => s.activeId);
+  const setActiveProduct = useAuraStore((s) => s.setActiveProduct);
+  const patchActive = useAuraStore((s) => s.patchActive);
 
+  const session = sessions.find((s) => s.id === activeId);
   const products = useMemo(() => data ?? [], [data]);
-  const session = sessions.find((x) => x.id === activeId);
   const active = products.find((p) => p.id === session?.productId);
 
   if (isLoading) {
     return (
       <div data-accent="cyan">
         <SectionLabel>сессия 0426 / агент товаров</SectionLabel>
-        <h2 className="mt-3 font-display text-3xl font-bold text-ink-50">Честная витрина</h2>
+        <h2 className="mt-3 text-3xl font-semibold text-ink-50">Честная витрина</h2>
         <div className="mt-6 grid gap-5 md:grid-cols-2">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-64 rounded-[20px] border-[1.5px] border-ink-50 bg-ink-800 p-6 shadow-[4px_4px_0_#211b14]"
-              style={{ ["--acc-rgb" as string]: "18 133 122" }}
+              className="h-64 rounded-xl border border-ink-700 bg-ink-800 p-6"
+              style={{ ["--acc-rgb" as string]: "103 232 249" }}
             >
               <div className="shimmer-bar h-4 w-40 rounded" />
               <div className="mt-6 space-y-3">
                 {[100, 84, 66].map((w, j) => (
-                  <div key={j} className="h-3 rounded-full bg-ink-700" style={{ width: `${w}%` }} />
+                  <div key={j} className="h-3 rounded bg-ink-700" style={{ width: `${w}%` }} />
                 ))}
               </div>
             </div>
           ))}
         </div>
-        <p className="mt-6 flex items-center gap-2 font-mono text-xs font-semibold text-[#0e6e62]">
-          <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-[#12857a]" />
+        <p className="mt-6 flex items-center gap-2 font-mono text-xs text-cyan-300">
+          <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-cyan-300" />
           агент товаров сканирует 14 источников…
         </p>
       </div>
@@ -887,3 +884,5 @@ export function ProductRoom() {
     <Showcase products={products} onOpen={(id) => setActiveProduct(id)} query={query} />
   );
 }
+
+export { IcScale, IcSpark };

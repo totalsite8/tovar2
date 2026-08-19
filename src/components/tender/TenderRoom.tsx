@@ -80,8 +80,7 @@ export function TenderRoom() {
   useEffect(() => {
     if (isLoading || cursor >= script.events.length) return;
     const prev = cursor === 0 ? 0 : script.events[cursor - 1].t;
-    /* замедленный, вдумчивый темп: событие за событием */
-    const delay = Math.max(430, (script.events[cursor].t - prev) * 1.55);
+    const delay = Math.max(140, script.events[cursor].t - prev);
     const id = window.setTimeout(() => setCursor((c) => c + 1), delay);
     return () => clearTimeout(id);
   }, [cursor, isLoading, script]);
