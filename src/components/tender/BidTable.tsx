@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import type { Bid, TenderPayload } from "../../data/types";
+import type { TenderPayload } from "../../data/types";
 import { fmtRub } from "../../lib/format";
 import { SectionLabel } from "../shared/Primitives";
 import { IcAlert, IcSpark } from "../shared/icons";
@@ -23,9 +23,9 @@ export function BidTable({
   return (
     <div className="overflow-hidden rounded-xl border border-ink-700 bg-ink-800/70">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink-700 px-5 py-3.5">
-        <SectionLabel>apples-to-apples · normalized by ai</SectionLabel>
+        <SectionLabel>честное сравнение · нормализовано ИИ</SectionLabel>
         <span className="font-mono text-[11px] text-ink-400">
-          {rows.length}/{tender.bids.length} bids in
+          откликов: {rows.length}/{tender.bids.length}
         </span>
       </div>
 
@@ -33,11 +33,11 @@ export function BidTable({
         <table className="w-full min-w-[720px] text-left text-[13px]">
           <thead>
             <tr className="border-b border-ink-700 font-mono text-[10px] uppercase tracking-[0.18em] text-ink-400">
-              <th className="px-5 py-3 font-medium">Company</th>
-              <th className="px-4 py-3 font-medium">Base price</th>
-              <th className="px-4 py-3 font-medium">Hidden fees</th>
-              <th className="px-4 py-3 font-medium">Final price</th>
-              <th className="px-5 py-3 font-medium">AI trust score</th>
+              <th className="px-5 py-3 font-medium">Подрядчик</th>
+              <th className="px-4 py-3 font-medium">Базовая цена</th>
+              <th className="px-4 py-3 font-medium">Скрытые доплаты</th>
+              <th className="px-4 py-3 font-medium">Итоговая цена</th>
+              <th className="px-5 py-3 font-medium">ИИ-рейтинг доверия</th>
             </tr>
           </thead>
           <tbody>
@@ -64,12 +64,12 @@ export function BidTable({
                         </span>
                         {pick && (
                           <span className="inline-flex items-center gap-1 rounded border border-violet-400/40 bg-violet-400/15 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-violet-300">
-                            <IcSpark /> ai pick
+                            <IcSpark /> выбор ИИ
                           </span>
                         )}
                       </div>
                       <p className="mt-0.5 font-mono text-[10px] text-ink-500">
-                        {b.kind} · via {b.source} · {b.response}
+                        {b.kind} · через {b.source} · {b.response}
                       </p>
                     </td>
                     <td className="px-4 py-4 font-mono text-ink-200">
@@ -78,7 +78,7 @@ export function BidTable({
                     <td className="px-4 py-4">
                       {b.hidden.length === 0 ? (
                         <span className="rounded bg-emerald-400/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-300">
-                          none · all-in
+                          нет · всё включено
                         </span>
                       ) : (
                         <ul className="space-y-1">
@@ -121,7 +121,7 @@ export function BidTable({
                           />
                         </span>
                         <span className="font-mono text-[9px] uppercase tracking-wider text-ink-500">
-                          {b.warranty} warranty
+                          гарантия {b.warranty}
                         </span>
                       </div>
                     </td>
@@ -136,7 +136,7 @@ export function BidTable({
       <div className="flex items-start gap-2 border-t border-ink-700 bg-ink-850/60 px-5 py-3">
         <IcSpark className="mt-0.5 shrink-0 text-violet-300" />
         <p className="text-[11.5px] leading-relaxed text-ink-300">
-          <span className="font-semibold text-violet-300">Why this pick:</span>{" "}
+          <span className="font-semibold text-violet-300">Почему этот выбор:</span>{" "}
           {tender.ai_pick_reason}
         </p>
       </div>

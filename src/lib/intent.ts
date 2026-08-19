@@ -7,10 +7,10 @@ export interface IntentResult {
 }
 
 const PRODUCT_RX =
-  /(buy|order|cheapest|price of|best deal|airpods|iphone|headphones|earbuds|laptop|macbook|tv |oled|sneakers|watch|phone|tablet|gpu|console|купить|цена)/i;
+  /(купить|заказать|дешевле|дешёвые|цена|наушники|наушник|айфон|iphone|airpods|кроссовки|кроссов|пылесос|телевизор|oled|ноутбук|телефон|планшет|buy|cheapest|sneakers|laptop|tv)/i;
 
 const TENDER_RX =
-  /(repair|install|replace|window|windows|plumb|electric|conditioner|\bac\b|renovate|mount|fix|cleaning|paint|tiling|ceiling|установ|окн|ремонт|замен)/i;
+  /(заменить|установить|установка|починить|отремонтировать|ремонт|окна|окно|кондиционер|электрик|сантехник|плитка|потолок|сделать|install|repair|replace|window|plumb)/i;
 
 export function detectIntent(query: string): IntentResult | null {
   const q = query.trim();
@@ -24,21 +24,36 @@ export function detectIntent(query: string): IntentResult | null {
 
   if (p >= t) {
     const confidence = Math.min(0.98, 0.72 + p * 0.02);
-    return { mode: "product", confidence, label: "Product Agent" };
+    return { mode: "product", confidence, label: "Агент Товаров" };
   }
   const confidence = Math.min(0.98, 0.74 + t * 0.02);
-  return { mode: "tender", confidence, label: "Tender Agent" };
+  return { mode: "tender", confidence, label: "Тендерный Агент" };
 }
 
 export const ROUTE_STEPS: Record<RoutedMode, string[]> = {
   product: [
-    "Parsing intent…",
-    "Routing → Product Agent",
-    "Negotiating cashback routes…",
+    "Разбор намерения…",
+    "Маршрут → Агент Товаров",
+    "Торгуемся за кэшбек-маршруты…",
   ],
   tender: [
-    "Parsing intent…",
-    "Routing → Tender Agent",
-    "Drafting technical spec (ТЗ)…",
+    "Разбор намерения…",
+    "Маршрут → Тендерный Агент",
+    "Составляем техзадание (ТЗ)…",
   ],
 };
+
+/** Сопоставляет запрос с конкретным товаром из каталога. */
+export function matchProductId(query: string): string | undefined {
+  const q = query.toLowerCase();
+  const hints: [string, string[]][] = [
+    ["airpods-pro-3", ["airpods", "аирподс", "наушник"]],
+    ["asics-kayano-31", ["кроссов", "sneakers", "asics", "марафон"]],
+    ["roborock-s8", ["пылесос", "vacuum", "roborock"]],
+    ["lg-oled-c4", ["телевизор", "oled"]],
+  ];
+  for (const [id, kws] of hints) {
+    if (kws.some((k) => q.includes(k))) return id;
+  }
+  return undefined;
+}

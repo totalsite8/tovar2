@@ -1,38 +1,184 @@
-{
-  "id": "airpods-pro-3",
-  "name": "AirPods Pro 3",
-  "category": "Audio · TWS earbuds",
-  "image": "https://image.qwenlm.ai/generated-images/ef656ee5-870f-44eb-a983-8a7eca69ae96/_result.png",
-  "query": "cheapest AirPods Pro 3 with real warranty",
-  "marketplaces_scanned": 14,
-  "market_cheapest": {
-    "retailer": "Ozon Global",
-    "price": 21990,
-    "delivery": "6–9 days",
-    "warranty": "seller-only, 14 days",
-    "returns": "paid return shipping"
+[
+  {
+    "id": "airpods-pro-3",
+    "name": "AirPods Pro 3",
+    "category": "Аудио · TWS-наушники",
+    "layout": "audio",
+    "image": "https://image.qwenlm.ai/generated-images/ef656ee5-870f-44eb-a983-8a7eca69ae96/_result.png",
+    "keywords": ["airpods", "аирподс", "наушник"],
+    "marketplaces_scanned": 14,
+    "market_cheapest": {
+      "retailer": "Ozon Global",
+      "price": 21990,
+      "delivery": "доставка 6–9 дней",
+      "warranty": "гарантия продавца, 14 дней",
+      "returns": "возврат за ваш счёт"
+    },
+    "partner": {
+      "retailer": "М.Видео · партнёр Aura",
+      "price": 23490,
+      "cashback_rate": 0.11,
+      "cashback": 2584,
+      "final": 20906,
+      "delivery": "доставка завтра, слот 2 часа",
+      "warranty": "1 год, официальный дистрибьютор",
+      "returns": "30 дней, бесплатный вывоз"
+    },
+    "savings_vs_market": 1084,
+    "price_index_90d": [
+      24990, 24790, 24490, 24190, 23990, 23690, 23990, 23490, 23190, 22790,
+      22490, 22190, 21990, 21990
+    ],
+    "cashback_source": "CPA-маршрут #A-114 · разделение маржи партнёра 62/38",
+    "trust_ledger": [
+      { "label": "Цена к индексу 90 дней", "value": "−16,3% · у исторического дна", "tone": "good" },
+      { "label": "Исполнение партнёром", "value": "98,2% в срок · 412 сделок", "tone": "good" },
+      { "label": "Проверка серийника", "value": "проходит по базе Apple", "tone": "good" },
+      { "label": "Риск серого импорта", "value": "высокий у рыночного пола", "tone": "bad" },
+      { "label": "Выплата кэшбека", "value": "мгновенно в Aura-кошелёк", "tone": "neutral" }
+    ]
   },
-  "partner": {
-    "retailer": "M.Video · Aura partner",
-    "price": 23490,
-    "cashback_rate": 0.11,
-    "cashback": 2584,
-    "final": 20906,
-    "delivery": "tomorrow, 2-hour slot",
-    "warranty": "1 year, official distributor",
-    "returns": "30 days, free pickup"
+  {
+    "id": "asics-kayano-31",
+    "name": "ASICS Gel-Kayano 31",
+    "category": "Спорт · беговые кроссовки",
+    "layout": "sneakers",
+    "image": "https://image.qwenlm.ai/generated-images/c5a34dd3-f283-41de-bb1b-815774ddd056/_result.png",
+    "keywords": ["кроссов", "sneakers", "asics", "марафон", "бегов"],
+    "marketplaces_scanned": 11,
+    "market_cheapest": {
+      "retailer": "Спортмастер",
+      "price": 14990,
+      "delivery": "доставка 2–4 дня",
+      "warranty": "30 дней на брак",
+      "returns": "возврат в магазин"
+    },
+    "partner": {
+      "retailer": "ASICS Store · партнёр Aura",
+      "price": 15990,
+      "cashback_rate": 0.12,
+      "cashback": 1919,
+      "final": 14071,
+      "delivery": "доставка завтра в примерочную",
+      "warranty": "90 дней, оригинал с пломбой",
+      "returns": "60 дней, бесплатный вывоз"
+    },
+    "savings_vs_market": 919,
+    "price_index_90d": [
+      17990, 17490, 16990, 16990, 16490, 15990, 15990, 15490, 15490, 14990,
+      14990, 15490, 14990, 14990
+    ],
+    "cashback_source": "CPA-маршрут #S-042 · партнёр делится маржой 12%",
+    "trust_ledger": [
+      { "label": "Оригинальность", "value": "пломба ASICS + чек дистрибьютора", "tone": "good" },
+      { "label": "Размерная сетка в наличии", "value": "6 из 8 размеров у партнёра", "tone": "good" },
+      { "label": "Пол vs партнёр с кэшбеком", "value": "партнёр дешевле на 919 ₽", "tone": "good" },
+      { "label": "Риск подделки на маркетплейсах", "value": "средний в этой категории", "tone": "bad" },
+      { "label": "Выплата кэшбека", "value": "мгновенно в Aura-кошелёк", "tone": "neutral" }
+    ],
+    "extras": {
+      "sizes": ["38", "39", "40", "41", "42", "43", "44", "45"],
+      "out": ["38", "44"],
+      "colors": [
+        { "name": "Чёрный / неон", "hex": "#16181f" },
+        { "name": "Белый / циан", "hex": "#e5e7eb" },
+        { "name": "Серый / фиолет", "hex": "#a78bfa" }
+      ]
+    }
   },
-  "savings_vs_market": 1084,
-  "price_index_90d": [
-    24990, 24790, 24490, 24190, 23990, 23690, 23990, 23490, 23190, 22790,
-    22490, 22190, 21990, 21990
-  ],
-  "cashback_source": "CPA route #A-114 · partner margin share 62/38",
-  "trust_ledger": [
-    { "label": "Price vs 90-day index", "value": "−16.3% · near historic floor", "tone": "good" },
-    { "label": "Partner fulfillment score", "value": "98.2% on-time · 412 deals", "tone": "good" },
-    { "label": "Serial-number check", "value": "passes Apple coverage API", "tone": "good" },
-    { "label": "Marketplace grey-import risk", "value": "high on cheapest offer", "tone": "bad" },
-    { "label": "Cashback payout", "value": "instant to Aura wallet", "tone": "neutral" }
-  ]
-}
+  {
+    "id": "roborock-s8",
+    "name": "Roborock S8 Pro Ultra",
+    "category": "Дом · робот-пылесос",
+    "layout": "appliance",
+    "image": "https://image.qwenlm.ai/generated-images/2aeffc58-f0e2-49e0-9425-132b1241da84/_result.png",
+    "keywords": ["пылесос", "vacuum", "roborock"],
+    "marketplaces_scanned": 16,
+    "market_cheapest": {
+      "retailer": "AliExpress",
+      "price": 54990,
+      "delivery": "доставка 14–21 день",
+      "warranty": "гарантия продавца 3 мес.",
+      "returns": "возврат в Китай за ваш счёт"
+    },
+    "partner": {
+      "retailer": "М.Видео · партнёр Aura",
+      "price": 59990,
+      "cashback_rate": 0.1,
+      "cashback": 5999,
+      "final": 53991,
+      "delivery": "доставка послезавтра",
+      "warranty": "2 года, сервис в вашем городе",
+      "returns": "30 дней, бесплатный вывоз"
+    },
+    "savings_vs_market": 999,
+    "price_index_90d": [
+      69990, 67990, 65990, 64990, 62990, 61990, 59990, 58990, 57990, 56990,
+      55990, 54990, 54990, 54990
+    ],
+    "cashback_source": "CPA-маршрут #H-208 · повышенная ставка до конца недели",
+    "trust_ledger": [
+      { "label": "Гарантия и сервис", "value": "2 года + авторизованный сервис", "tone": "good" },
+      { "label": "Сравнение 16 источников", "value": "пол AliExpress — серый импорт", "tone": "bad" },
+      { "label": "Цена к индексу 90 дней", "value": "−22,9% от пика сезона", "tone": "good" },
+      { "label": "Прошивка и регион", "value": "RU-версия, русский в приложении", "tone": "good" },
+      { "label": "Выплата кэшбека", "value": "мгновенно в Aura-кошелёк", "tone": "neutral" }
+    ],
+    "extras": {
+      "specs": [
+        ["Всасывание", "6 000 Па"],
+        ["Станция", "3-в-1: зарядка, стирка, сушка"],
+        ["Батарея", "5 200 мА·ч · до 180 мин"],
+        ["Влажная уборка", "вибро-швабра 3 000 кол/мин"]
+      ],
+      "alt_offers": [
+        { "retailer": "Wildberries", "price": 56490, "note": "продавец ИП · гарантия 1 мес." },
+        { "retailer": "DNS", "price": 57990, "note": "в наличии · без кэшбек-маршрута" }
+      ]
+    }
+  },
+  {
+    "id": "lg-oled-c4",
+    "name": "LG OLED C4 55″",
+    "category": "Дом · OLED-телевизор",
+    "layout": "tv",
+    "image": "https://image.qwenlm.ai/generated-images/9a91b5f8-09f1-4e30-b75a-2a2c06e122f3/_result.png",
+    "keywords": ["телевизор", "oled", "lg"],
+    "marketplaces_scanned": 13,
+    "market_cheapest": {
+      "retailer": "Ozon",
+      "price": 129990,
+      "delivery": "доставка 3–5 дней",
+      "warranty": "1 год магазина",
+      "returns": "возврат по тарифу Ozon"
+    },
+    "partner": {
+      "retailer": "Холодильник.ру · партнёр Aura",
+      "price": 139990,
+      "cashback_rate": 0.08,
+      "cashback": 11199,
+      "final": 128791,
+      "delivery": "доставка завтра + монтаж в подарок",
+      "warranty": "3 года официальной гарантии LG",
+      "returns": "30 дней, бесплатный вывоз"
+    },
+    "savings_vs_market": 1199,
+    "price_index_90d": [
+      159990, 156990, 154990, 149990, 146990, 144990, 141990, 139990, 136990,
+      134990, 132990, 131990, 129990, 129990
+    ],
+    "cashback_source": "CPA-маршрут #T-517 · сезонная ставка 8% + бонус монтажа",
+    "trust_ledger": [
+      { "label": "Тренд цены", "value": "6 недель подряд вниз — дно близко", "tone": "good" },
+      { "label": "Риск битой матрицы", "value": "страховка партнёра на доставку", "tone": "good" },
+      { "label": "Официальная гарантия LG", "value": "3 года против 1 года у пола", "tone": "good" },
+      { "label": "Монтаж", "value": "в подарок у партнёра, 4 990 ₽ у других", "tone": "good" },
+      { "label": "Выплата кэшбека", "value": "мгновенно в Aura-кошелёк", "tone": "neutral" }
+    ],
+    "extras": {
+      "meter": 82,
+      "verdict": "Цена у исторического дна — агент советует фиксировать",
+      "weeks_down": 6
+    }
+  }
+]

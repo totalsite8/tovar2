@@ -31,22 +31,22 @@ type Phase = "spec" | "army" | "bids" | "decision";
 
 const PHASE_CHIP: Record<Phase, { label: string; cls: string; live: boolean }> = {
   spec: {
-    label: "drafting ТЗ",
+    label: "пишем ТЗ",
     cls: "border-violet-400/40 bg-violet-400/10 text-violet-300",
     live: true,
   },
   army: {
-    label: "AI army deployed",
+    label: "ИИ-армия в деле",
     cls: "border-amber-400/40 bg-amber-400/10 text-amber-300",
     live: true,
   },
   bids: {
-    label: "live bidding",
+    label: "живые торги",
     cls: "border-violet-400/40 bg-violet-400/10 text-violet-300",
     live: true,
   },
   decision: {
-    label: "ready for escrow",
+    label: "готово к эскроу",
     cls: "border-emerald-400/40 bg-emerald-400/10 text-emerald-300",
     live: false,
   },
@@ -60,6 +60,7 @@ export function TenderRoom() {
   const query = useAuraStore((s) => s.query);
   const sessionSeed = useAuraStore((s) => s.sessionSeed);
   const replaySession = useAuraStore((s) => s.replaySession);
+  const patchActive = useAuraStore((s) => s.patchActive);
   const pushToast = useAuraStore((s) => s.pushToast);
 
   const script = useMemo(() => getFeedScript(), []);
@@ -75,7 +76,7 @@ export function TenderRoom() {
     setEscrowOpen(false);
   }, [sessionSeed]);
 
-  /* playback engine — walks the timestamped feed script */
+  /* движок проигрывания — идёт по таймкодам сценария ленты */
   useEffect(() => {
     if (isLoading || cursor >= script.events.length) return;
     const prev = cursor === 0 ? 0 : script.events[cursor - 1].t;
@@ -110,7 +111,7 @@ export function TenderRoom() {
 
   function copy(text: string) {
     navigator.clipboard?.writeText(text).catch(() => {});
-    pushToast("Copied to clipboard", "violet");
+    pushToast("Скопировано в буфер обмена", "violet");
   }
 
   if (isLoading || !tender) {
@@ -137,7 +138,7 @@ export function TenderRoom() {
         </div>
         <p className="mt-6 flex items-center gap-2 font-mono text-xs text-violet-300">
           <span className="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-violet-300" />
-          tender agent compiling technical spec…
+          тендерный агент составляет техзадание…
         </p>
       </div>
     );
@@ -147,29 +148,28 @@ export function TenderRoom() {
     <div data-accent={phase === "army" ? "amber" : "violet"}>
       <Header query={query} chip={chip} done={done} />
 
-      {/* controls */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {!done && (
           <button
             onClick={() => setCursor(script.events.length)}
             className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-300 transition-all hover:border-violet-400/50 hover:text-violet-300"
           >
-            <IcFwd /> fast-forward
+            <IcFwd /> ускорить
           </button>
         )}
         <button
           onClick={() => replaySession()}
           className="inline-flex items-center gap-1.5 rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-300 transition-all hover:border-violet-400/50 hover:text-violet-300"
         >
-          <IcReplay /> replay session
+          <IcReplay /> повторить сессию
         </button>
         <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
-          task #{tender.task_id} · {tender.district}
+          задача #{tender.task_id} · {tender.district}
         </span>
       </div>
 
       <div className="mt-4 grid gap-5 lg:grid-cols-12">
-        {/* ---- left: live feed + smart-link ---- */}
+        {/* ---- слева: живая лента + смарт-ссылка ---- */}
         <div className="flex min-h-0 flex-col gap-5 lg:col-span-7">
           <div className="h-[440px]">
             <ActivityFeed events={visible} total={script.events.length} />
@@ -187,11 +187,11 @@ export function TenderRoom() {
           </AnimatePresence>
         </div>
 
-        {/* ---- right: spec + ai army roster ---- */}
+        {/* ---- справа: ТЗ + ИИ-армия ---- */}
         <div className="flex flex-col gap-5 lg:col-span-5">
           <Panel className="p-5">
             <div className="flex items-center justify-between">
-              <SectionLabel>technical spec · ТЗ</SectionLabel>
+              <SectionLabel>техзадание · ТЗ</SectionLabel>
               <span className="text-violet-300">
                 <IcDoc />
               </span>
@@ -214,7 +214,7 @@ export function TenderRoom() {
               {specLines < tender.spec.length && (
                 <li className="flex items-center gap-2 font-mono text-[11px] text-violet-300">
                   <span className="caret inline-block h-3 w-[6px] bg-violet-300" />
-                  extracting…
+                  извлекаем…
                 </li>
               )}
             </ul>
@@ -225,7 +225,7 @@ export function TenderRoom() {
                 className="mt-4 border-t border-ink-700 pt-3"
               >
                 <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
-                  hard constraints
+                  жёсткие условия
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   {tender.constraints.map((c) => (
@@ -241,7 +241,7 @@ export function TenderRoom() {
 
           <Panel className="p-5">
             <div className="flex items-center justify-between">
-              <SectionLabel>ai army · cold-start protocol</SectionLabel>
+              <SectionLabel>ИИ-армия · протокол холодного старта</SectionLabel>
               <span
                 className={`rounded border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider ${
                   phase === "army"
@@ -251,30 +251,30 @@ export function TenderRoom() {
                       : "border-ink-600 text-ink-500"
                 }`}
               >
-                {phase === "army" ? "active" : has("escalate") ? "complete" : "standby"}
+                {phase === "army" ? "в работе" : has("escalate") ? "готово" : "ожидание"}
               </span>
             </div>
             <ul className="mt-4 space-y-3">
               {(
                 [
                   {
-                    id: "scout",
+                    id: "разведчик",
                     icon: <IcRadar />,
-                    desc: "scrapes 2GIS + Yandex Maps for crews",
+                    desc: "сканирует 2ГИС + Яндекс Карты",
                     on: has("escalate"),
                     active: phase === "army" && !has("whatsapp"),
                   },
                   {
-                    id: "voice",
+                    id: "голосовой ИИ",
                     icon: <IcPhone />,
-                    desc: "calls contractors, qualifies capacity",
+                    desc: "звонит подрядчикам, проверяет мощности",
                     on: has("voice"),
                     active: has("voice") && !has("whatsapp"),
                   },
                   {
-                    id: "negotiator",
+                    id: "переговорщик",
                     icon: <IcChat />,
-                    desc: "sends ТЗ over WhatsApp Smart-Links",
+                    desc: "рассылает ТЗ по WhatsApp Smart-Link",
                     on: has("whatsapp"),
                     active: has("whatsapp") && !done,
                   },
@@ -319,19 +319,20 @@ export function TenderRoom() {
               ))}
             </ul>
             <p className="mt-3 border-t border-ink-700 pt-3 text-[11px] leading-relaxed text-ink-400">
-              Contractors never register. Bids flow in through the Smart-Link —
-              that is how Aura wins markets with zero supply on day one.
+              Подрядчики никогда не регистрируются. Отклики заходят через
+              Smart-Link — так Aura выигрывает рынки с нулевым предложением в
+              первый же день.
             </p>
           </Panel>
         </div>
       </div>
 
-      {/* ---- comparison ---- */}
+      {/* ---- сравнение ---- */}
       <div className="mt-5">
         <BidTable tender={tender} revealed={revealedBids} />
       </div>
 
-      {/* ---- decision / escrow ---- */}
+      {/* ---- решение / эскроу ---- */}
       <AnimatePresence>
         {phase === "decision" && pick && (
           <motion.div
@@ -347,15 +348,15 @@ export function TenderRoom() {
                 </span>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-ink-50">
-                    Escrow <span className="font-mono text-emerald-300">{secured}</span> opened ·{" "}
-                    {fmtRub(pick.final)} frozen
+                    Эскроу <span className="font-mono text-emerald-300">{secured}</span> открыт ·{" "}
+                    {fmtRub(pick.final)} заморожено
                   </p>
                   <p className="mt-0.5 text-xs text-ink-300">
-                    {tender.escrow.milestones.join(" · ")} — releases only on your acceptance.
+                    {tender.escrow.milestones.join(" · ")} — раскрытие только по акту приёмки.
                   </p>
                 </div>
                 <span className="ml-auto rounded-md border border-emerald-400/40 bg-emerald-400/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-emerald-300">
-                  funds frozen
+                  средства заморожены
                 </span>
               </Panel>
             ) : (
@@ -366,12 +367,12 @@ export function TenderRoom() {
                       <span className="font-semibold text-violet-300">
                         {pick.company}
                       </span>{" "}
-                      at <span className="font-mono text-ink-50">{fmtRub(pick.final)}</span>{" "}
-                      all-in · trust {pick.trust} · {pick.warranty} warranty
+                      за <span className="font-mono text-ink-50">{fmtRub(pick.final)}</span>{" "}
+                      под ключ · доверие {pick.trust} · гарантия {pick.warranty}
                     </p>
                     <p className="mt-1 flex items-start gap-1.5 text-[11.5px] text-ink-400">
                       <IcShield className="mt-0.5 shrink-0 text-violet-300" />
-                      {tender.escrow.freeze_note} Fee {tender.escrow.fee_pct}% · refunds instant on contractor no-show.
+                      {tender.escrow.freeze_note} Комиссия {tender.escrow.fee_pct}% · мгновенный возврат, если подрядчик пропал.
                     </p>
                   </div>
                   <div className="flex flex-col gap-2.5 sm:flex-row lg:shrink-0">
@@ -379,13 +380,13 @@ export function TenderRoom() {
                       onClick={() => setEscrowOpen(true)}
                       className="inline-flex items-center justify-center gap-2 rounded-lg bg-violet-400 px-5 py-3 text-sm font-semibold text-ink-950 transition-all duration-200 hover:bg-violet-300 hover:shadow-[0_0_30px_-6px_rgba(167,139,250,0.8)] active:scale-[0.98]"
                     >
-                      <IcShield /> Secure Deal & Pay {fmtRub(pick.final)}
+                      <IcShield /> Зафиксировать сделку · {fmtRub(pick.final)}
                     </button>
                     <button
                       onClick={() => setContactsOpen((o) => !o)}
                       className="inline-flex items-center justify-center gap-2 rounded-lg border border-ink-600 px-5 py-3 text-sm text-ink-300 transition-all hover:border-ink-400 hover:text-ink-100"
                     >
-                      Just get contacts
+                      Просто контакты
                     </button>
                   </div>
                 </div>
@@ -418,7 +419,7 @@ export function TenderRoom() {
                               <button
                                 onClick={() => copy(b.phone)}
                                 className="rounded-md border border-ink-600 p-1.5 text-ink-300 transition-colors hover:border-violet-400/50 hover:text-violet-300"
-                                aria-label={`copy ${b.company} phone`}
+                                aria-label={`скопировать телефон ${b.company}`}
                               >
                                 <IcCopy />
                               </button>
@@ -426,7 +427,7 @@ export function TenderRoom() {
                           ))}
                       </div>
                       <p className="mt-2 font-mono text-[10px] text-ink-500">
-                        heads-up: without escrow, Aura can't verify the final invoice.
+                        без эскроу Aura не сможет проверить финальный счёт — имейте в виду.
                       </p>
                     </motion.div>
                   )}
@@ -437,7 +438,7 @@ export function TenderRoom() {
         )}
       </AnimatePresence>
 
-      {/* ---- escrow modal ---- */}
+      {/* ---- модалка эскроу ---- */}
       <AnimatePresence>
         {escrowOpen && pick && (
           <motion.div
@@ -456,11 +457,11 @@ export function TenderRoom() {
               className="w-full max-w-md rounded-xl border border-violet-400/30 bg-ink-850 p-6 shadow-[0_30px_90px_-20px_rgba(0,0,0,0.9),0_0_60px_-20px_rgba(167,139,250,0.4)]"
             >
               <div className="flex items-center justify-between">
-                <SectionLabel className="text-violet-300">escrow confirmation</SectionLabel>
+                <SectionLabel className="text-violet-300">подтверждение эскроу</SectionLabel>
                 <button
                   onClick={() => setEscrowOpen(false)}
                   className="text-ink-400 transition-colors hover:text-ink-100"
-                  aria-label="close"
+                  aria-label="закрыть"
                 >
                   <IcX />
                 </button>
@@ -468,7 +469,7 @@ export function TenderRoom() {
               <h3 className="mt-4 text-xl font-semibold text-ink-50">
                 {pick.company} · {fmtRub(pick.final)}
               </h3>
-              <p className="mt-1 text-xs text-ink-400">{tender.title} · task #{tender.task_id}</p>
+              <p className="mt-1 text-xs text-ink-400">{tender.title} · задача #{tender.task_id}</p>
               <ul className="mt-4 space-y-2">
                 {tender.escrow.milestones.map((m, i) => (
                   <li key={m} className="flex items-center gap-2.5 text-[12.5px] text-ink-200">
@@ -480,18 +481,20 @@ export function TenderRoom() {
                 ))}
               </ul>
               <p className="mt-4 rounded-lg border border-ink-700 bg-ink-950/60 p-3 text-[11.5px] leading-relaxed text-ink-300">
-                {tender.escrow.freeze_note} Service fee {tender.escrow.fee_pct}% · dispute
-                resolution in 24h by Aura arbitrators.
+                {tender.escrow.freeze_note} Комиссия сервиса {tender.escrow.fee_pct}% · споры
+                разбирают арбитры Aura за 24 часа.
               </p>
               <button
                 onClick={() => {
-                  setSecured(newOrderId());
+                  const id = newOrderId();
+                  setSecured(id);
+                  patchActive({ secured: true });
                   setEscrowOpen(false);
-                  pushToast("Escrow opened — funds frozen until acceptance", "violet");
+                  pushToast("Эскроу открыт — средства заморожены до приёмки", "violet");
                 }}
                 className="mt-5 w-full rounded-lg bg-violet-400 py-3 text-sm font-semibold text-ink-950 transition-all hover:bg-violet-300 hover:shadow-[0_0_30px_-6px_rgba(167,139,250,0.8)] active:scale-[0.98]"
               >
-                Freeze {fmtRub(pick.final)} in escrow
+                Заморозить {fmtRub(pick.final)} в эскроу
               </button>
             </motion.div>
           </motion.div>
@@ -513,14 +516,14 @@ function Header({
   return (
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <SectionLabel>session 0426 / tender-agent / orchestrator room</SectionLabel>
+        <SectionLabel>сессия 0426 / тендерный агент / комната оркестратора</SectionLabel>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-ink-50 sm:text-4xl">
-          The Service Solver
+          Решатель Услуг
         </h2>
         <p className="mt-2 max-w-lg text-sm text-ink-300">
-          Intent:{" "}
+          Запрос:{" "}
           <span className="font-mono text-violet-200">
-            “{query || "replace 3 windows, turnkey"}”
+            «{query || "заменить 3 окна под ключ"}»
           </span>
         </p>
       </div>
@@ -543,3 +546,5 @@ function Header({
     </div>
   );
 }
+
+export { LiveDot };

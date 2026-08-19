@@ -2,160 +2,99 @@
   "session": "0426",
   "events": [
     {
-      "id": "ev01",
-      "t": 400,
-      "agent": "orchestrator",
-      "kind": "route",
-      "text": "Intent classified → SERVICE · window replacement",
-      "detail": "confidence 0.96 · routed to Tender Agent"
+      "id": "ev01", "t": 400, "agent": "orchestrator", "kind": "route",
+      "text": "Намерение распознано → УСЛУГА · замена окон",
+      "detail": "уверенность 0.96 · маршрут → Тендерный Агент"
     },
     {
-      "id": "ev02",
-      "t": 1400,
-      "agent": "tender",
-      "kind": "spec",
-      "text": "Drafting technical spec (ТЗ) from a single message…",
-      "detail": "extracting openings, profile, floor, GOST refs"
+      "id": "ev02", "t": 1400, "agent": "tender", "kind": "spec",
+      "text": "Пишем техзадание (ТЗ) из одного сообщения…",
+      "detail": "извлекаем проёмы, профиль, этаж, ссылки на ГОСТ"
     },
     {
-      "id": "ev03",
-      "t": 2900,
-      "agent": "tender",
-      "kind": "spec",
-      "text": "ТЗ ready · 5 spec lines · 3 hard constraints",
-      "detail": "user confirmed silently — no forms, no calls"
+      "id": "ev03", "t": 2900, "agent": "tender", "kind": "spec",
+      "text": "ТЗ готово · 5 пунктов · 3 жёстких условия",
+      "detail": "подтверждено молча — без форм и звонков"
     },
     {
-      "id": "ev04",
-      "t": 3900,
-      "agent": "tender",
-      "kind": "check",
-      "text": "Checking verified partner DB in district…",
-      "detail": "query: windows · pvc · turnkey · radius 12 km"
+      "id": "ev04", "t": 3900, "agent": "tender", "kind": "check",
+      "text": "Проверяем проверенных партнёров в районе…",
+      "detail": "запрос: окна · пвх · под ключ · радиус 12 км"
     },
     {
-      "id": "ev05",
-      "t": 5000,
-      "agent": "orchestrator",
-      "kind": "escalate",
-      "text": "0 verified partners available → escalating to AI ARMY",
-      "detail": "cold-start protocol engaged · zero-friction recruitment"
+      "id": "ev05", "t": 5000, "agent": "orchestrator", "kind": "escalate",
+      "text": "Проверенных партнёров 0 → поднимаем ИИ-АРМИЮ",
+      "detail": "протокол холодного старта · подрядчики без регистрации"
     },
     {
-      "id": "ev06",
-      "t": 6200,
-      "agent": "scout",
-      "kind": "scout",
-      "text": "Scout scanning 2GIS + Yandex Maps…",
-      "detail": "12 km radius · category: window installation"
+      "id": "ev06", "t": 6200, "agent": "scout", "kind": "scout",
+      "text": "Разведчик сканирует 2ГИС + Яндекс Карты…",
+      "detail": "радиус 12 км · категория: установка окон"
     },
     {
-      "id": "ev07",
-      "t": 8000,
-      "agent": "scout",
-      "kind": "scout",
-      "text": "Scout found 45 contractors → 12 targets",
-      "detail": "filtered: rating ≥ 4.2 · active phone · no blacklist hits"
+      "id": "ev07", "t": 8000, "agent": "scout", "kind": "scout",
+      "text": "Разведчик нашёл 45 подрядчиков → 12 целей",
+      "detail": "фильтр: рейтинг ≥ 4.2 · живой телефон · не в чёрном списке"
     },
     {
-      "id": "ev08",
-      "t": 9300,
-      "agent": "voice",
-      "kind": "voice",
-      "text": "Voice AI dialing MasterPlus LLC…",
-      "detail": "script: qualify capacity this week → hand off to Smart-Link"
+      "id": "ev08", "t": 9300, "agent": "voice", "kind": "voice",
+      "text": "Голосовой ИИ звонит в «МастерПлюс»…",
+      "detail": "скрипт: мощности на неделе → передача Smart-Link"
     },
     {
-      "id": "ev09",
-      "t": 11100,
-      "agent": "voice",
-      "kind": "voice",
-      "text": "Call answered · 42s · capacity confirmed",
-      "detail": "agreed to price the ТЗ via Smart-Link today"
+      "id": "ev09", "t": 11100, "agent": "voice", "kind": "voice",
+      "text": "Трубку взяли · 42 с · мощности на неделе есть",
+      "detail": "согласились оценить ТЗ по Smart-Link сегодня"
     },
     {
-      "id": "ev10",
-      "t": 12200,
-      "agent": "negotiator",
-      "kind": "whatsapp",
-      "text": "Sent ТЗ via WhatsApp Smart-Link → MasterPlus",
-      "detail": "aura.link/w7x2 · one-field bid form attached"
+      "id": "ev10", "t": 12200, "agent": "negotiator", "kind": "whatsapp",
+      "text": "ТЗ отправлено в WhatsApp → «МастерПлюс»",
+      "detail": "aura.link/w7x2 · форма отклика на одно поле"
     },
     {
-      "id": "ev11",
-      "t": 13000,
-      "agent": "negotiator",
-      "kind": "whatsapp",
-      "text": "Batch-sent Smart-Link → OknaStroy, Aero, Ivan P. +8 more",
-      "detail": "personalized opener per contractor profile"
+      "id": "ev11", "t": 13000, "agent": "negotiator", "kind": "whatsapp",
+      "text": "Smart-Link разослан → «ОкнаСтрой», Aero, Иван П. + ещё 9",
+      "detail": "вступление персонализировано под профиль подрядчика"
     },
     {
-      "id": "ev12",
-      "t": 14200,
-      "agent": "scout",
-      "kind": "open",
-      "text": "OknaStroy opened Smart-Link · 12s on page",
-      "detail": "viewed photo + spec · typing price…"
+      "id": "ev12", "t": 14200, "agent": "scout", "kind": "open",
+      "text": "«ОкнаСтрой» открыл Smart-Link · 12 с на странице",
+      "detail": "смотрит фото + ТЗ · вводит цену…"
     },
     {
-      "id": "ev13",
-      "t": 15300,
-      "agent": "tender",
-      "kind": "bid",
-      "bidId": "b2",
-      "text": "Bid received · OknaStroy · 152,000 ₽ all-in",
-      "detail": "no hidden fees detected · 3-year warranty"
+      "id": "ev13", "t": 15300, "agent": "tender", "kind": "bid", "bidId": "b2",
+      "text": "Отклик · «ОкнаСтрой» · 152 000 ₽ под ключ",
+      "detail": "скрытых доплат нет · гарантия 3 года"
     },
     {
-      "id": "ev14",
-      "t": 16400,
-      "agent": "scout",
-      "kind": "open",
-      "text": "Aero Window Systems opened Smart-Link",
-      "detail": "second visit · checking warranty constraints"
+      "id": "ev14", "t": 16400, "agent": "scout", "kind": "open",
+      "text": "Aero Window Systems открыл Smart-Link",
+      "detail": "повторный заход · проверяет условия гарантии"
     },
     {
-      "id": "ev15",
-      "t": 17600,
-      "agent": "tender",
-      "kind": "bid",
-      "bidId": "b1",
-      "text": "Bid received · MasterPlus · 148,500 ₽ base",
-      "detail": "fine-print scan: +18,500 ₽ in separate line items"
+      "id": "ev15", "t": 17600, "agent": "tender", "kind": "bid", "bidId": "b1",
+      "text": "Отклик · «МастерПлюс» · база 148 500 ₽",
+      "detail": "скан мелкого шрифта: +18 500 ₽ отдельными строками"
     },
     {
-      "id": "ev16",
-      "t": 18800,
-      "agent": "tender",
-      "kind": "bid",
-      "bidId": "b3",
-      "text": "Bid received · Ivan P. · 129,000 ₽ base",
-      "detail": "materials excluded: +9,400 ₽ estimated"
+      "id": "ev16", "t": 18800, "agent": "tender", "kind": "bid", "bidId": "b3",
+      "text": "Отклик · Иван П. · база 129 000 ₽",
+      "detail": "материалы не включены: +9 400 ₽ по смете"
     },
     {
-      "id": "ev17",
-      "t": 20000,
-      "agent": "tender",
-      "kind": "bid",
-      "bidId": "b4",
-      "text": "Bid received · Aero Window Systems · 143,700 ₽",
-      "detail": "+3,000 ₽ hardware adjustment · 5-year warranty"
+      "id": "ev17", "t": 20000, "agent": "tender", "kind": "bid", "bidId": "b4",
+      "text": "Отклик · Aero Window Systems · 143 700 ₽",
+      "detail": "+3 000 ₽ регулировка фурнитуры · гарантия 5 лет"
     },
     {
-      "id": "ev18",
-      "t": 21400,
-      "agent": "orchestrator",
-      "kind": "analyze",
-      "text": "Normalizing bids → apples-to-apples",
-      "detail": "stripping hidden fees · weighting warranty, reviews, disputes"
+      "id": "ev18", "t": 21400, "agent": "orchestrator", "kind": "analyze",
+      "text": "Нормализуем отклики → сравниваем честно",
+      "detail": "убираем скрытые доплаты · взвешиваем гарантию и споры"
     },
     {
-      "id": "ev19",
-      "t": 22800,
-      "agent": "orchestrator",
-      "kind": "ready",
-      "text": "4 bids ranked · best value: Aero Window Systems",
-      "detail": "146,700 ₽ all-in · trust 93 · ready for escrow"
+      "id": "ev19", "t": 22800, "agent": "orchestrator", "kind": "ready",
+      "text": "4 отклика ранжированы · лучший: Aero Window Systems",
+      "detail": "146 700 ₽ под ключ · доверие 93 · готово к эскроу"
     }
   ]
 }

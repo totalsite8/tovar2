@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { detectIntent, ROUTE_STEPS } from "../../lib/intent";
+import { detectIntent, matchProductId, ROUTE_STEPS } from "../../lib/intent";
 import { useAuraStore } from "../../store/useAuraStore";
 import { IcArrow, IcBolt, IcSpark } from "../shared/icons";
 
 const SUGGESTIONS: { text: string; hint: "cyan" | "violet" }[] = [
-  { text: "cheapest AirPods Pro 3 with real warranty", hint: "cyan" },
-  { text: "replace 3 windows, turnkey", hint: "violet" },
-  { text: "install AC in a 45 m² office", hint: "violet" },
+  { text: "самые дешёвые AirPods Pro 3", hint: "cyan" },
+  { text: "кроссовки ASICS для марафона", hint: "cyan" },
+  { text: "робот-пылесос с самоочисткой", hint: "cyan" },
+  { text: "заменить 3 окна под ключ", hint: "violet" },
+  { text: "установить кондиционер в офисе", hint: "violet" },
 ];
 
 export function Omnibar() {
@@ -20,20 +22,15 @@ export function Omnibar() {
   const timers = useRef<number[]>([]);
 
   const intent = useMemo(() => detectIntent(value), [value]);
-  const accent =
-    routeStep !== null
-      ? intent?.mode === "product"
-        ? "cyan"
-        : "violet"
-      : intent
-        ? intent.mode === "product"
-          ? "cyan"
-          : "violet"
-        : "neutral";
+  const accent = intent
+    ? intent.mode === "product"
+      ? "cyan"
+      : "violet"
+    : "neutral";
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  /* mission board can queue an intent → omnibar types & fires it */
+  /* доска миссий может поставить запрос в очередь → омнибар печатает и запускает его */
   useEffect(() => {
     if (!pendingIntent) return;
     setValue(pendingIntent);
@@ -54,20 +51,20 @@ export function Omnibar() {
     const res = detectIntent(q);
     if (!res) {
       setShake((s) => s + 1);
-      pushToast("Intent unclear — try “buy …” or “install …”", "amber");
+      pushToast("Намерение не ясно — попробуйте «купить …» или «установить …»", "amber");
       return;
     }
     const steps = ROUTE_STEPS[res.mode];
     setRouteStep(0);
     steps.forEach((_, i) => {
       if (i === 0) return;
-      timers.current.push(
-        window.setTimeout(() => setRouteStep(i), i * 480)
-      );
+      timers.current.push(window.setTimeout(() => setRouteStep(i), i * 480));
     });
     timers.current.push(
       window.setTimeout(() => {
-        activate(res.mode, q);
+        const productId =
+          res.mode === "product" ? matchProductId(q) : undefined;
+        activate(res.mode, q, productId);
         setRouteStep(null);
         setValue("");
         setFocused(false);
@@ -80,7 +77,6 @@ export function Omnibar() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40">
-      {/* fade so content scrolls under */}
       <div className="h-10 bg-gradient-to-t from-ink-950 to-transparent" />
       <div
         className="px-3 sm:px-6"
@@ -102,7 +98,6 @@ export function Omnibar() {
                 : "acc-border acc-ring"
             }`}
           >
-            {/* routing state */}
             <AnimatePresence mode="wait">
               {routeStep !== null && intent ? (
                 <motion.div
@@ -141,7 +136,6 @@ export function Omnibar() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  {/* main input row */}
                   <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
                     <span
                       className={`shrink-0 text-lg transition-colors duration-500 ${
@@ -164,9 +158,9 @@ export function Omnibar() {
                           setFocused(false);
                         }
                       }}
-                      placeholder="Ask Aura — buy anything, fix anything…"
+                      placeholder="Спросите Aura — купить что угодно, починить что угодно…"
                       className="min-w-0 flex-1 bg-transparent text-[15px] text-ink-50 outline-none placeholder:text-ink-400"
-                      aria-label="Ask Aura"
+                      aria-label="Запрос к Aura"
                     />
                     <AnimatePresence>
                       {intent && (
@@ -188,13 +182,12 @@ export function Omnibar() {
                           ? "acc-bg acc-glow text-ink-950 hover:scale-105 active:scale-95"
                           : "cursor-default bg-ink-700 text-ink-400"
                       }`}
-                      aria-label="Route intent"
+                      aria-label="Отправить запрос"
                     >
                       <IcArrow />
                     </button>
                   </div>
 
-                  {/* suggestions */}
                   <AnimatePresence>
                     {expanded && value.length === 0 && (
                       <motion.div
@@ -206,7 +199,7 @@ export function Omnibar() {
                       >
                         <div className="flex flex-wrap items-center gap-2 border-t border-ink-700 px-4 py-3 sm:px-5">
                           <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
-                            try
+                            попробуйте
                           </span>
                           {SUGGESTIONS.map((s) => (
                             <button
@@ -233,9 +226,8 @@ export function Omnibar() {
             </AnimatePresence>
           </motion.div>
 
-          {/* helper caption */}
           <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ink-500">
-            omnibar · intent router · enter to dispatch
+            омнибар · маршрутизатор намерений · enter — отправить
           </div>
         </div>
       </div>

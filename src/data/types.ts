@@ -1,4 +1,4 @@
-/* ---------- shared agent taxonomy ---------- */
+/* ---------- таксономия агентов ---------- */
 export type AgentId =
   | "orchestrator"
   | "product"
@@ -7,9 +7,9 @@ export type AgentId =
   | "voice"
   | "negotiator";
 
-export type AgentColor = "cyan" | "violet" | "amber" | "slate";
+/* ---------- агент товаров ---------- */
+export type ProductLayout = "audio" | "sneakers" | "appliance" | "tv";
 
-/* ---------- product agent ---------- */
 export interface RetailerOption {
   retailer: string;
   price: number;
@@ -30,12 +30,24 @@ export interface LedgerRow {
   tone: "good" | "bad" | "neutral";
 }
 
+export interface ProductExtras {
+  sizes?: string[];
+  out?: string[];
+  colors?: { name: string; hex: string }[];
+  specs?: [string, string][];
+  alt_offers?: { retailer: string; price: number; note: string }[];
+  meter?: number;
+  verdict?: string;
+  weeks_down?: number;
+}
+
 export interface ProductPayload {
   id: string;
   name: string;
   category: string;
+  layout: ProductLayout;
   image: string;
-  query: string;
+  keywords: string[];
   marketplaces_scanned: number;
   market_cheapest: RetailerOption;
   partner: PartnerOption;
@@ -43,9 +55,10 @@ export interface ProductPayload {
   price_index_90d: number[];
   cashback_source: string;
   trust_ledger: LedgerRow[];
+  extras?: ProductExtras;
 }
 
-/* ---------- tender agent ---------- */
+/* ---------- тендерный агент ---------- */
 export interface HiddenFee {
   label: string;
   amount: number;
@@ -54,14 +67,14 @@ export interface HiddenFee {
 export interface Bid {
   id: string;
   company: string;
-  kind: "LLC" | "private master";
+  kind: "ООО" | "частный мастер";
   response: string;
   warranty: string;
   base: number;
   hidden: HiddenFee[];
   final: number;
   trust: number;
-  source: "partner db" | "2GIS" | "Yandex Maps";
+  source: string;
   phone: string;
 }
 
@@ -87,7 +100,7 @@ export interface TenderPayload {
   };
 }
 
-/* ---------- orchestrator feed ---------- */
+/* ---------- лента оркестратора ---------- */
 export type FeedKind =
   | "route"
   | "spec"
@@ -103,7 +116,7 @@ export type FeedKind =
 
 export interface FeedEvent {
   id: string;
-  t: number; // ms since session start
+  t: number;
   agent: AgentId;
   kind: FeedKind;
   text: string;

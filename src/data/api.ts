@@ -3,12 +3,18 @@ import tenderJson from "../mock/tender.json";
 import feedJson from "../mock/orchestrator_feed.json";
 import type { FeedScript, ProductPayload, TenderPayload } from "./types";
 
-/** Mock network latency so TanStack Query loading states are honest. */
+/** Мок-задержка сети, чтобы TanStack Query честно показывал загрузку. */
 const wait = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 
-export async function fetchProduct(): Promise<ProductPayload> {
-  await wait(750);
-  return productsJson as unknown as ProductPayload;
+const PRODUCTS = productsJson as unknown as ProductPayload[];
+
+export async function fetchProducts(): Promise<ProductPayload[]> {
+  await wait(700);
+  return PRODUCTS;
+}
+
+export function getProductsSync(): ProductPayload[] {
+  return PRODUCTS;
 }
 
 export async function fetchTender(): Promise<TenderPayload> {
@@ -16,7 +22,7 @@ export async function fetchTender(): Promise<TenderPayload> {
   return tenderJson as unknown as TenderPayload;
 }
 
-/** Feed script is local — the orchestrator "streams" it event by event. */
+/** Сценарий ленты локальный — оркестратор «стримит» его событие за событием. */
 export function getFeedScript(): FeedScript {
   return feedJson as unknown as FeedScript;
 }
