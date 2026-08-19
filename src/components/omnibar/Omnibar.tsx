@@ -4,18 +4,12 @@ import { detectIntent, matchProductId, ROUTE_STEPS } from "../../lib/intent";
 import { useAuraStore } from "../../store/useAuraStore";
 import { IcArrow, IcBolt, IcSpark } from "../shared/icons";
 
-/* подсказки кликабельны: ведут прямо на конкретный просчёт */
-const SUGGESTIONS: {
-  text: string;
-  mode: "product" | "tender";
-  productId?: string;
-  tag: string;
-}[] = [
-  { text: "самые дешёвые AirPods Pro 3", mode: "product", productId: "airpods-pro-3", tag: "расчёт · −1 084 ₽" },
-  { text: "кроссовки ASICS для марафона", mode: "product", productId: "asics-kayano-31", tag: "расчёт · −919 ₽" },
-  { text: "робот-пылесос с самоочисткой", mode: "product", productId: "roborock-s8", tag: "расчёт · −999 ₽" },
-  { text: "OLED 55″ — момент покупки", mode: "product", productId: "lg-oled-c4", tag: "расчёт · −1 199 ₽" },
-  { text: "заменить 3 окна под ключ", mode: "tender", tag: "живые торги · 4 отклика" },
+const SUGGESTIONS: { text: string; hint: "cyan" | "violet" }[] = [
+  { text: "самые дешёвые AirPods Pro 3", hint: "cyan" },
+  { text: "кроссовки ASICS для марафона", hint: "cyan" },
+  { text: "робот-пылесос с самоочисткой", hint: "cyan" },
+  { text: "заменить 3 окна под ключ", hint: "violet" },
+  { text: "установить кондиционер в офисе", hint: "violet" },
 ];
 
 export function Omnibar() {
@@ -36,7 +30,7 @@ export function Omnibar() {
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
-  /* доска миссий ставит запрос в очередь → омнибар печатает и запускает его */
+  /* доска миссий может поставить запрос в очередь → омнибар печатает и запускает его */
   useEffect(() => {
     if (!pendingIntent) return;
     setValue(pendingIntent);
@@ -51,24 +45,6 @@ export function Omnibar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingIntent]);
 
-  function runRoute(mode: "product" | "tender", q: string, productId?: string) {
-    const steps = ROUTE_STEPS[mode];
-    setRouteStep(0);
-    steps.forEach((_, i) => {
-      if (i === 0) return;
-      timers.current.push(window.setTimeout(() => setRouteStep(i), i * 640));
-    });
-    timers.current.push(
-      window.setTimeout(() => {
-        activate(mode, q, productId);
-        setRouteStep(null);
-        setValue("");
-        setFocused(false);
-        inputRef.current?.blur();
-      }, steps.length * 640 + 320)
-    );
-  }
-
   function submit(raw?: string) {
     const q = (raw ?? value).trim();
     if (routeStep !== null || q.length === 0) return;
@@ -78,10 +54,22 @@ export function Omnibar() {
       pushToast("Намерение не ясно — попробуйте «купить …» или «установить …»", "amber");
       return;
     }
-    runRoute(
-      res.mode,
-      q,
-      res.mode === "product" ? matchProductId(q) : undefined
+    const steps = ROUTE_STEPS[res.mode];
+    setRouteStep(0);
+    steps.forEach((_, i) => {
+      if (i === 0) return;
+      timers.current.push(window.setTimeout(() => setRouteStep(i), i * 480));
+    });
+    timers.current.push(
+      window.setTimeout(() => {
+        const productId =
+          res.mode === "product" ? matchProductId(q) : undefined;
+        activate(res.mode, q, productId);
+        setRouteStep(null);
+        setValue("");
+        setFocused(false);
+        inputRef.current?.blur();
+      }, steps.length * 480 + 260)
     );
   }
 
@@ -104,9 +92,9 @@ export function Omnibar() {
             animate={shake ? { x: [0, -9, 9, -6, 6, 0] } : { x: 0 }}
             transition={{ duration: 0.4 }}
             key={shake}
-            className={`rounded-[20px] border-[1.5px] bg-ink-800/95 transition-all duration-500 ${
+            className={`rounded-[20px] border bg-ink-850/95 transition-all duration-500 ${
               accent === "neutral"
-                ? "border-ink-50 shadow-[0_24px_50px_-20px_rgba(33,27,20,0.45)]"
+                ? "border-ink-600 shadow-[0_18px_60px_-20px_rgba(0,0,0,0.9)]"
                 : "acc-border acc-ring"
             }`}
           >
@@ -137,7 +125,7 @@ export function Omnibar() {
                       </motion.span>
                     </AnimatePresence>
                   </div>
-                  <div className="mt-3 h-[4px] overflow-hidden rounded-full bg-ink-700">
+                  <div className="mt-3 h-[3px] overflow-hidden rounded-full bg-ink-700">
                     <div className="shimmer-bar h-full w-full rounded-full" />
                   </div>
                 </motion.div>
@@ -171,7 +159,7 @@ export function Omnibar() {
                         }
                       }}
                       placeholder="Спросите Aura — купить что угодно, починить что угодно…"
-                      className="min-w-0 flex-1 bg-transparent text-[15px] font-medium text-ink-50 outline-none placeholder:text-ink-400"
+                      className="min-w-0 flex-1 bg-transparent text-[15px] text-ink-50 outline-none placeholder:text-ink-400"
                       aria-label="Запрос к Aura"
                     />
                     <AnimatePresence>
@@ -191,7 +179,7 @@ export function Omnibar() {
                       disabled={!intent}
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-base transition-all duration-300 ${
                         intent
-                          ? "acc-bg text-paper acc-glow hover:scale-105 active:scale-95"
+                          ? "acc-bg acc-glow text-ink-950 hover:scale-105 active:scale-95"
                           : "cursor-default bg-ink-700 text-ink-400"
                       }`}
                       aria-label="Отправить запрос"
@@ -210,23 +198,23 @@ export function Omnibar() {
                         className="overflow-hidden"
                       >
                         <div className="flex flex-wrap items-center gap-2 border-t border-ink-700 px-4 py-3 sm:px-5">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-                            готовый просчёт:
+                          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
+                            попробуйте
                           </span>
                           {SUGGESTIONS.map((s) => (
                             <button
                               key={s.text}
-                              onClick={() => runRoute(s.mode, s.text, s.productId)}
-                              className={`sticker-acc group flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:-translate-y-px ${
-                                s.mode === "product"
-                                  ? "bg-[#12857a]/10 text-[#0e6e62]"
-                                  : "bg-[#6d5fd0]/10 text-[#5a4ebd]"
+                              onClick={() => {
+                                setValue(s.text);
+                                inputRef.current?.focus();
+                              }}
+                              className={`rounded-full border px-3 py-1.5 text-xs transition-all duration-200 hover:-translate-y-px ${
+                                s.hint === "cyan"
+                                  ? "border-cyan-400/25 bg-cyan-400/5 text-cyan-200 hover:border-cyan-300/60 hover:bg-cyan-400/10"
+                                  : "border-violet-400/25 bg-violet-400/5 text-violet-200 hover:border-violet-300/60 hover:bg-violet-400/10"
                               }`}
                             >
                               {s.text}
-                              <span className="rounded-full bg-paper px-1.5 py-0.5 font-mono text-[8.5px] uppercase tracking-wider text-ink-300">
-                                {s.tag}
-                              </span>
                             </button>
                           ))}
                         </div>
@@ -238,7 +226,7 @@ export function Omnibar() {
             </AnimatePresence>
           </motion.div>
 
-          <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ink-400">
+          <div className="mt-2 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-ink-500">
             омнибар · маршрутизатор намерений · enter — отправить
           </div>
         </div>

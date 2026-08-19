@@ -1,71 +1,52 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Unbounded", "Manrope", ui-sans-serif, sans-serif;
+  --font-sans: "Geist Variable", "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* тёплая кремовая шкала (значение токенов инвертировано под светлую тему) */
-  --color-ink-950: #f1ebdc;
-  --color-ink-900: #f5f0e4;
-  --color-ink-850: #faf6eb;
-  --color-ink-800: #fffcf4;
-  --color-ink-700: #e8dfc9;
-  --color-ink-600: #d7cbb0;
-  --color-ink-500: #b4a68b;
-  --color-ink-400: #8e8168;
-  --color-ink-300: #6c6050;
-  --color-ink-200: #4a4034;
-  --color-ink-100: #332b22;
-  --color-ink-50: #211b14;
-  --color-paper: #fdf9ef;
-
-  /* палитра 2026 · уютный молодёжный свет:
-     шалфей (товары) · лаванда (тендеры) · маргольд (ИИ-армия) */
-  --color-cyan-200: #0e6e62;
-  --color-cyan-300: #12857a;
-  --color-cyan-400: #1b9c8d;
-  --color-violet-200: #5a4ebd;
-  --color-violet-300: #6d5fd0;
-  --color-violet-400: #8377e3;
-  --color-amber-200: #a9700f;
-  --color-amber-300: #c9871b;
-  --color-amber-400: #e8a33d;
-  --color-emerald-300: #2e7d4f;
-  --color-emerald-400: #3e9160;
-  --color-red-400: #d64545;
-  --color-red-500: #c43b3b;
+  --color-ink-950: #06070a;
+  --color-ink-900: #0b0c10;
+  --color-ink-850: #0e1016;
+  --color-ink-800: #12141c;
+  --color-ink-700: #1b1f2b;
+  --color-ink-600: #262b3a;
+  --color-ink-500: #3a4152;
+  --color-ink-400: #545c70;
+  --color-ink-300: #7d8598;
+  --color-ink-200: #a6adbd;
+  --color-ink-100: #d2d7e2;
+  --color-ink-50: #eef0f6;
 }
 
-/* ---------- акценты режимов ---------- */
+/* ---------- mode accent machinery ---------- */
 :root {
-  --acc: #8e8168;
-  --acc-rgb: 142 129 104;
+  --acc: #8b93a5;
+  --acc-rgb: 139 147 165;
 }
 [data-accent="cyan"] {
-  --acc: #12857a;
-  --acc-rgb: 18 133 122;
+  --acc: #67e8f9;
+  --acc-rgb: 103 232 249;
 }
 [data-accent="violet"] {
-  --acc: #6d5fd0;
-  --acc-rgb: 109 95 208;
+  --acc: #a78bfa;
+  --acc-rgb: 167 139 250;
 }
 [data-accent="amber"] {
-  --acc: #c9871b;
-  --acc-rgb: 201 135 27;
+  --acc: #fbbf24;
+  --acc-rgb: 251 191 36;
 }
 
 .acc-text { color: var(--acc); }
 .acc-bg { background-color: var(--acc); }
-.acc-border { border-color: rgb(var(--acc-rgb) / 0.55); }
-.acc-soft { background-color: rgb(var(--acc-rgb) / 0.09); }
-.acc-faint { background-color: rgb(var(--acc-rgb) / 0.05); }
+.acc-border { border-color: rgb(var(--acc-rgb) / 0.5); }
+.acc-soft { background-color: rgb(var(--acc-rgb) / 0.08); }
+.acc-faint { background-color: rgb(var(--acc-rgb) / 0.045); }
 .acc-ring {
   box-shadow:
-    0 0 0 1.5px rgb(var(--acc-rgb) / 0.4),
-    0 18px 50px -18px rgb(var(--acc-rgb) / 0.35);
+    0 0 0 1px rgb(var(--acc-rgb) / 0.4),
+    0 12px 60px -18px rgb(var(--acc-rgb) / 0.45);
 }
-.acc-glow { box-shadow: 0 6px 24px -8px rgb(var(--acc-rgb) / 0.5); }
+.acc-glow { box-shadow: 0 0 26px -6px rgb(var(--acc-rgb) / 0.55); }
 .acc-anim {
   transition:
     color 0.45s ease,
@@ -75,18 +56,20 @@
     opacity 0.45s ease;
 }
 
-/* ---------- база ---------- */
-html { color-scheme: light; }
+/* ---------- base ---------- */
+html {
+  color-scheme: dark;
+}
 body {
   font-family: var(--font-sans);
   background: var(--color-ink-950);
-  color: var(--color-ink-200);
+  color: var(--color-ink-100);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 ::selection {
-  background: rgb(var(--acc-rgb) / 0.25);
-  color: #211b14;
+  background: rgb(var(--acc-rgb) / 0.28);
+  color: #fff;
 }
 * {
   scrollbar-width: thin;
@@ -96,64 +79,26 @@ body {
 *::-webkit-scrollbar-thumb { background: var(--color-ink-600); border-radius: 8px; }
 *::-webkit-scrollbar-track { background: transparent; }
 
-/* ---------- карточки и «стикерные» кнопки ---------- */
-.card-shadow {
-  box-shadow:
-    0 24px 48px -30px rgb(33 27 20 / 0.35),
-    0 1px 0 rgb(33 27 20 / 0.04);
-}
-.sticker {
-  border: 1.5px solid #211b14;
-  box-shadow: 3px 3px 0 #211b14;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-.sticker:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 #211b14;
-}
-.sticker:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 #211b14;
-}
-.sticker-acc {
-  border: 1.5px solid #211b14;
-  box-shadow: 3px 3px 0 rgb(var(--acc-rgb) / 0.9);
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.2s ease;
-}
-.sticker-acc:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 rgb(var(--acc-rgb) / 0.9);
-}
-.sticker-acc:active {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0 rgb(var(--acc-rgb) / 0.9);
-}
-
-/* ---------- фоновые слои ---------- */
-.bg-dots {
-  background-image: radial-gradient(rgb(33 27 20 / 0.08) 1px, transparent 1.2px);
-  background-size: 22px 22px;
-  mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 80%);
+/* ---------- layered ambient background ---------- */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 72% at 50% 0%, black 25%, transparent 78%);
 }
 .noise {
-  background-image: url("image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.5'/></svg>");
+  background-image: url("image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.55'/></svg>");
   background-size: 160px 160px;
 }
 
 /* ---------- keyframes ---------- */
 @keyframes drift {
-  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
-  12% { opacity: 0.85; }
-  88% { opacity: 0.85; }
-  100% { transform: translate3d(26px, -96px, 0) rotate(40deg); opacity: 0; }
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  12% { opacity: 0.9; }
+  88% { opacity: 0.9; }
+  100% { transform: translate3d(24px, -90px, 0); opacity: 0; }
 }
 @keyframes pulseDot {
   0%, 100% { transform: scale(1); opacity: 1; }
@@ -171,19 +116,15 @@ body {
   0% { transform: scale(0.9); opacity: 0.7; }
   100% { transform: scale(2.1); opacity: 0; }
 }
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-}
 
 .dot-live { animation: pulseDot 2.2s ease-in-out infinite; }
 .caret { animation: caretBlink 1s steps(1) infinite; }
 .shimmer-bar {
   background: linear-gradient(
     100deg,
-    rgb(var(--acc-rgb) / 0.14) 35%,
-    rgb(var(--acc-rgb) / 0.7) 50%,
-    rgb(var(--acc-rgb) / 0.14) 65%
+    rgb(var(--acc-rgb) / 0.12) 35%,
+    rgb(var(--acc-rgb) / 0.75) 50%,
+    rgb(var(--acc-rgb) / 0.12) 65%
   );
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
@@ -193,7 +134,7 @@ body {
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  border: 1.5px solid rgb(var(--acc-rgb) / 0.7);
+  border: 1px solid rgb(var(--acc-rgb) / 0.7);
   animation: ringPing 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
 }
 
