@@ -1,87 +1,87 @@
 {
   "task_id": "W-7X2",
-  "title": "Replace 3 PVC windows, turnkey",
-  "district": "Akademichesky district · 12 km radius",
+  "title": "Замена 3 ПВХ-окон под ключ",
+  "district": "Академический район · радиус 12 км",
   "photo": "https://image.qwenlm.ai/generated-images/4764c380-17e8-4cc7-be9e-e32eb99ce5b0/_result.png",
   "spec": [
-    "3 openings · 1400 × 1500 mm · PVC profile ≥ 70 mm",
-    "Double-glazed, energy-saving coating, argon fill",
-    "5th floor · no freight elevator · rigging included",
-    "GOST 30971-2012 installation · vapor barrier tapes",
-    "Demolition + debris removal + finishing slopes"
+    "3 проёма · 1400 × 1500 мм · ПВХ-профиль ≥ 70 мм",
+    "Двухкамерный стеклопакет, энергосбережение, аргон",
+    "5-й этаж · грузового лифта нет · подъём включён",
+    "Монтаж по ГОСТ 30971-2012 · пароизоляционные ленты",
+    "Демонтаж + вывоз мусора + чистовые откосы"
   ],
   "constraints": [
-    "Measure visit within 48h",
-    "Fixed price after measure · no surcharges",
-    "Warranty ≥ 3 years on seams and hardware"
+    "Замер в течение 48 часов",
+    "Фикс-цена после замера · без доплат",
+    "Гарантия на швы и фурнитуру ≥ 3 лет"
   ],
   "bids": [
     {
       "id": "b1",
-      "company": "MasterPlus LLC",
-      "kind": "LLC",
-      "response": "replied in 2m 10s",
-      "warranty": "6 months",
+      "company": "«МастерПлюс»",
+      "kind": "ООО",
+      "response": "ответ через 2 мин 10 с",
+      "warranty": "6 мес.",
       "base": 148500,
       "hidden": [
-        { "label": "installation works", "amount": 12000 },
-        { "label": "delivery & rigging", "amount": 6500 }
+        { "label": "монтажные работы", "amount": 12000 },
+        { "label": "доставка и подъём", "amount": 6500 }
       ],
       "final": 167000,
       "trust": 71,
-      "source": "2GIS",
+      "source": "2ГИС",
       "phone": "+7 (912) 480-22-31"
     },
     {
       "id": "b2",
-      "company": "OknaStroy",
-      "kind": "LLC",
-      "response": "replied in 4m 45s",
-      "warranty": "3 years",
+      "company": "«ОкнаСтрой»",
+      "kind": "ООО",
+      "response": "ответ через 4 мин 45 с",
+      "warranty": "3 года",
       "base": 152000,
       "hidden": [],
       "final": 152000,
       "trust": 88,
-      "source": "Yandex Maps",
+      "source": "Яндекс Карты",
       "phone": "+7 (343) 287-14-05"
     },
     {
       "id": "b3",
-      "company": "Ivan P.",
-      "kind": "private master",
-      "response": "replied in 6m 20s",
-      "warranty": "1 year",
+      "company": "Иван П.",
+      "kind": "частный мастер",
+      "response": "ответ через 6 мин 20 с",
+      "warranty": "1 год",
       "base": 129000,
-      "hidden": [{ "label": "fasteners, sealant, PSUL", "amount": 9400 }],
+      "hidden": [{ "label": "крепёж, герметик, ПСУЛ", "amount": 9400 }],
       "final": 138400,
       "trust": 79,
-      "source": "2GIS",
+      "source": "2ГИС",
       "phone": "+7 (902) 117-53-84"
     },
     {
       "id": "b4",
       "company": "Aero Window Systems",
-      "kind": "LLC",
-      "response": "replied in 3m 05s",
-      "warranty": "5 years",
+      "kind": "ООО",
+      "response": "ответ через 3 мин 05 с",
+      "warranty": "5 лет",
       "base": 143700,
-      "hidden": [{ "label": "hardware adjustment", "amount": 3000 }],
+      "hidden": [{ "label": "регулировка фурнитуры", "amount": 3000 }],
       "final": 146700,
       "trust": 93,
-      "source": "2GIS",
+      "source": "2ГИС",
       "phone": "+7 (343) 302-88-40"
     }
   ],
   "ai_pick": "b4",
-  "ai_pick_reason": "Lowest all-in price among bids with trust ≥ 85 · 5-year warranty · 96 jobs on Aura escrow, 0 disputes",
+  "ai_pick_reason": "минимальная итоговая цена при доверии ≥ 85 · гарантия 5 лет · 96 сделок через эскроу Aura, 0 споров",
   "escrow": {
-    "freeze_note": "Funds freeze in Aura Escrow and release only after you sign the acceptance act.",
-    "milestones": ["30% on contract", "60% after installation", "10% after 14-day check"],
+    "freeze_note": "Деньги замораживаются в Aura-эскроу и уходят подрядчику только после подписания акта приёмки.",
+    "milestones": ["30% при договоре", "60% после монтажа", "10% после 14 дней проверки"],
     "fee_pct": 1.2
   },
   "smartlink": {
     "url": "aura.link/w7x2",
-    "open_rate": "83% of contractors open within 11 minutes",
-    "median_response": "median first bid in 3m 40s"
+    "open_rate": "83% подрядчиков открывают за 11 минут",
+    "median_response": "медианный первый отклик — 3 мин 40 с"
   }
 }

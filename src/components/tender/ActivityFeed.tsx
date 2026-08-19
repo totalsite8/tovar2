@@ -25,13 +25,13 @@ export function ActivityFeed({ events, total }: { events: FeedEvent[]; total: nu
     <div className="flex h-full min-h-0 flex-col rounded-xl border border-ink-700 bg-ink-800/70">
       <div className="flex items-center justify-between border-b border-ink-700 px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <SectionLabel>live activity</SectionLabel>
+          <SectionLabel>лента действий · живая</SectionLabel>
           <LiveDot />
         </div>
         <span className="font-mono text-[11px] text-ink-400">
-          {events.length}/{total} events ·{" "}
+          {events.length}/{total} событий ·{" "}
           <span className="text-violet-300">
-            t{events.length ? fmtT(events[events.length - 1].t) : "+0.0s"}
+            t{events.length ? fmtT(events[events.length - 1].t) : "+0.0с"}
           </span>
         </span>
       </div>
@@ -39,7 +39,7 @@ export function ActivityFeed({ events, total }: { events: FeedEvent[]; total: nu
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto p-3">
         {events.length === 0 && (
           <p className="p-4 font-mono text-xs text-ink-500">
-            awaiting orchestrator…
+            оркестратор разгоняется…
           </p>
         )}
         <AnimatePresence initial={false}>

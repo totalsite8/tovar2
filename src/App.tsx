@@ -5,9 +5,11 @@ import { Omnibar } from "./components/omnibar/Omnibar";
 import { MissionBoard } from "./components/home/MissionBoard";
 import { ProductRoom } from "./components/product/ProductRoom";
 import { TenderRoom } from "./components/tender/TenderRoom";
+import { SessionDrawer } from "./components/sessions/SessionDrawer";
 import { clock } from "./lib/format";
+import { IcDoc, IcTag } from "./components/shared/icons";
 
-/* ---------------- ambient background ---------------- */
+/* ---------------- живой фон ---------------- */
 function BackgroundFX() {
   const particles = [
     { left: "12%", top: "68%", delay: "0s", size: 3 },
@@ -20,7 +22,6 @@ function BackgroundFX() {
   return (
     <>
       <div className="pointer-events-none fixed inset-0 z-0">
-        {/* mode-reactive glow */}
         <div
           className="acc-anim absolute inset-x-0 top-[-20%] h-[70%]"
           style={{
@@ -28,7 +29,6 @@ function BackgroundFX() {
               "radial-gradient(ellipse 60% 55% at 50% 0%, rgb(var(--acc-rgb) / 0.075), transparent 70%)",
           }}
         />
-        {/* fixed anchors so idle is never flat */}
         <div
           className="absolute right-[-15%] top-[30%] h-[60%] w-[55%]"
           style={{
@@ -44,7 +44,6 @@ function BackgroundFX() {
           }}
         />
         <div className="bg-grid absolute inset-0" />
-        {/* drifting motes */}
         {particles.map((p, i) => (
           <span
             key={i}
@@ -59,13 +58,12 @@ function BackgroundFX() {
           />
         ))}
       </div>
-      {/* film grain */}
       <div className="noise pointer-events-none fixed inset-0 z-[60] opacity-[0.05]" />
     </>
   );
 }
 
-/* ---------------- header ---------------- */
+/* ---------------- шапка ---------------- */
 function Clock() {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
@@ -104,7 +102,7 @@ function Wordmark() {
           AURA
         </span>
         <span className="mt-1 block font-mono text-[9px] uppercase tracking-[0.22em] text-ink-400">
-          orchestrator 2.6
+          оркестратор 2.6
         </span>
       </div>
     </div>
@@ -112,21 +110,43 @@ function Wordmark() {
 }
 
 const AGENT_DOTS = [
-  { label: "product", cls: "bg-cyan-300" },
-  { label: "tender", cls: "bg-violet-300" },
-  { label: "army", cls: "bg-amber-300" },
+  { label: "товары", cls: "bg-cyan-300" },
+  { label: "тендеры", cls: "bg-violet-300" },
+  { label: "армия", cls: "bg-amber-300" },
 ];
 
+function Chevron({ dir }: { dir: 1 | -1 }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ transform: dir === -1 ? "rotate(180deg)" : undefined }}
+      aria-hidden
+    >
+      <path d="M4 12h15M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
 function Header() {
-  const { mode, goHome } = useAuraStore();
+  const { mode, goHome, sessions, activeId, stepSession, setDrawer } =
+    useAuraStore();
+  const idx = sessions.findIndex((s) => s.id === activeId);
+
   return (
     <header className="sticky top-0 z-30 border-b border-ink-800 bg-ink-950/85 backdrop-blur-sm">
       <div
-        className="mx-auto flex max-w-6xl items-center gap-5 px-4 py-3 sm:px-6"
+        className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6"
         style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
       >
         <Wordmark />
-        <div className="ml-2 hidden items-center gap-4 md:flex">
+        <div className="ml-1 hidden items-center gap-4 lg:flex">
           {AGENT_DOTS.map((a) => (
             <span key={a.label} className="flex items-center gap-1.5">
               <span className={`dot-live h-1.5 w-1.5 rounded-full ${a.cls}`} />
@@ -136,8 +156,36 @@ function Header() {
             </span>
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2.5">
           <Clock />
+
+          {sessions.length > 0 && (
+            <div className="flex items-center overflow-hidden rounded-md border border-ink-600">
+              <button
+                onClick={() => stepSession(-1)}
+                disabled={idx <= 0}
+                className="px-2 py-1.5 text-ink-300 transition-colors hover:bg-ink-700 hover:text-ink-50 disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Предыдущий запрос"
+              >
+                <Chevron dir={-1} />
+              </button>
+              <button
+                onClick={() => setDrawer(true)}
+                className="border-x border-ink-600 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-200 transition-colors hover:bg-ink-700 hover:text-ink-50"
+              >
+                запросы · {sessions.length}
+              </button>
+              <button
+                onClick={() => stepSession(1)}
+                disabled={idx >= sessions.length - 1}
+                className="px-2 py-1.5 text-ink-300 transition-colors hover:bg-ink-700 hover:text-ink-50 disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="Следующий запрос"
+              >
+                <Chevron dir={1} />
+              </button>
+            </div>
+          )}
+
           <AnimatePresence>
             {mode !== "idle" && (
               <motion.button
@@ -147,7 +195,7 @@ function Header() {
                 onClick={goHome}
                 className="rounded-md border border-ink-600 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-ink-200 transition-all hover:border-ink-400 hover:text-ink-50"
               >
-                new session
+                на главную
               </motion.button>
             )}
           </AnimatePresence>
@@ -157,7 +205,7 @@ function Header() {
   );
 }
 
-/* ---------------- toasts ---------------- */
+/* ---------------- тосты ---------------- */
 const TONE_CLS: Record<Toast["tone"], string> = {
   cyan: "border-cyan-400/40 text-cyan-200",
   violet: "border-violet-400/40 text-violet-200",
@@ -193,7 +241,7 @@ function Toasts() {
   );
 }
 
-/* ---------------- app ---------------- */
+/* ---------------- приложение ---------------- */
 export default function App() {
   const mode = useAuraStore((s) => s.mode);
   const accent =
@@ -219,11 +267,18 @@ export default function App() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <footer className="mt-14 border-t border-ink-800 pt-5 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-ink-500">
-          aura mvp 0.9.2 · agents mocked locally · pwa ready · escrow simulated
+        <footer className="mt-14 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-t border-ink-800 pt-5 text-center font-mono text-[10px] uppercase tracking-[0.22em] text-ink-500">
+          <span className="flex items-center gap-1.5 text-cyan-400/80">
+            <IcTag /> честная витрина
+          </span>
+          <span className="flex items-center gap-1.5 text-violet-400/80">
+            <IcDoc /> живые торги
+          </span>
+          <span>aura mvp 0.9.2 · демо · агенты локально · pwa</span>
         </footer>
       </main>
       <Toasts />
+      <SessionDrawer />
       <Omnibar />
     </div>
   );

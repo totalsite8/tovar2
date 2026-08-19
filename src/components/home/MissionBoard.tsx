@@ -13,40 +13,40 @@ import { IcArrow, IcBolt, IcShield, IcWallet } from "../shared/icons";
 
 const WIRE: { agent: "scout" | "voice" | "product" | "tender"; text: string }[] =
   [
-    { agent: "scout", text: "mapped 12 new window contractors in Akademichesky" },
-    { agent: "voice", text: "qualified an AC-install crew on a 51s call" },
-    { agent: "product", text: "cashback route #A-114 paid out 2,584 ₽" },
-    { agent: "tender", text: "spec #2041 accepted by contractor, no edits" },
-    { agent: "scout", text: "Smart-Link opened by OknaStroy · 12s on page" },
-    { agent: "tender", text: "escrow released · job #1987 accepted by user" },
+    { agent: "scout", text: "нашёл 12 новых оконных подрядчиков в Академическом" },
+    { agent: "voice", text: "квалифицировал бригаду монтажников за 51 с звонка" },
+    { agent: "product", text: "кэшбек-маршрут #A-114 выплатил 2 584 ₽" },
+    { agent: "tender", text: "ТЗ #2041 принято подрядчиком без правок" },
+    { agent: "scout", text: "«ОкнаСтрой» открыл Smart-Link · 12 с на странице" },
+    { agent: "tender", text: "эскроу раскрыт · работа #1987 принята пользователем" },
   ];
 
 const LEDGER = [
   {
     n: "01",
-    title: "Cold start, solved",
-    body: "No contractors in the DB? The AI Army scrapes 2GIS & Yandex Maps, calls crews with Voice AI and collects bids over WhatsApp — zero registration on their side.",
+    title: "Холодный старт — решён",
+    body: "Подрядчиков нет в базе? ИИ-армия сканирует 2ГИС и Яндекс Карты, звонит бригадам голосовым ИИ и собирает отклики в WhatsApp — без регистрации с их стороны.",
     icon: <IcBolt />,
     tint: "text-amber-300",
   },
   {
     n: "02",
-    title: "Trust, engineered",
-    body: "Every bid is normalized to apples-to-apples: hidden fees exposed, warranty weighted, disputes checked. Money sits in escrow until you sign acceptance.",
+    title: "Доверие — инженерно",
+    body: "Каждый отклик нормализуется: скрытые доплаты наружу, гарантия взвешена, споры проверены. Деньги сидят в эскроу, пока вы не подпишете акт.",
     icon: <IcShield />,
     tint: "text-violet-300",
   },
   {
     n: "03",
-    title: "Honest math",
-    body: "The Product Agent shows the raw market floor — then beats it. Partner price minus Aura cashback, computed live, lands below the cheapest listing.",
+    title: "Честная математика",
+    body: "Агент Товаров показывает сырой рыночный пол — и бьёт его: цена партнёра минус кэшбек Aura, посчитанная на ваших глазах.",
     icon: <IcWallet />,
     tint: "text-cyan-300",
   },
 ];
 
 export function MissionBoard() {
-  const queueIntent = useAuraStore((s) => s.queueIntent);
+  const { queueIntent, sessions, selectSession, activeId } = useAuraStore();
   const [wire, setWire] = useState(0);
 
   useEffect(() => {
@@ -61,14 +61,14 @@ export function MissionBoard() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-12">
-      {/* ---- left: statement ---- */}
+      {/* ---- слева: манифест ---- */}
       <div className="flex flex-col justify-between gap-10 lg:col-span-7">
         <div>
           <Reveal>
-            <SectionLabel>session 0426 · orchestrator online</SectionLabel>
+            <SectionLabel>сессия 0426 · оркестратор в сети</SectionLabel>
           </Reveal>
           <h1 className="mt-5 text-[clamp(2.4rem,6vw,4.6rem)] leading-[1.02] font-semibold tracking-tight text-ink-50">
-            {["Three agents.", "One honest", "answer."].map((l, i) => (
+            {["Три агента.", "Один честный", "ответ."].map((l, i) => (
               <span key={l} className="block overflow-hidden">
                 <motion.span
                   className="block"
@@ -82,7 +82,7 @@ export function MissionBoard() {
                 >
                   {i === 1 ? (
                     <>
-                      One <span className="text-cyan-300">honest</span>
+                      Один <span className="text-cyan-300">честный</span>
                     </>
                   ) : (
                     l
@@ -93,24 +93,25 @@ export function MissionBoard() {
           </h1>
           <Reveal i={3}>
             <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-300">
-              Aura routes a single sentence to specialized agents that buy,
-              negotiate and verify on your behalf — and shows its work in real
-              time, so trust is earned on-screen, not asked for.
+              Aura направляет одно предложение специализированным агентам,
+              которые покупают, торгуются и проверяют за вас — и показывают
+              работу в реальном времени, чтобы доверие возникло на экране, а не
+              на словах.
             </p>
           </Reveal>
         </div>
 
         <Reveal i={4}>
           <div className="grid grid-cols-2 gap-6 border-t border-ink-700 pt-6 sm:grid-cols-4">
-            <Stat value="3/3" label="agents online" accent />
-            <Stat value="11.2%" label="median savings" />
-            <Stat value="3m 40s" label="time to first bid" />
-            <Stat value="4.2M ₽" label="in escrow now" />
+            <Stat value="3/3" label="агентов в сети" accent />
+            <Stat value="11,2%" label="медианная экономия" />
+            <Stat value="3 мин 40 с" label="до первого отклика" />
+            <Stat value="4,2 млн ₽" label="сейчас в эскроу" />
           </div>
         </Reveal>
       </div>
 
-      {/* ---- right: agent channels ---- */}
+      {/* ---- справа: каналы агентов ---- */}
       <div className="flex flex-col gap-4 lg:col-span-5">
         <Reveal i={2}>
           <Panel hover className="group relative overflow-hidden p-5">
@@ -120,19 +121,17 @@ export function MissionBoard() {
               <LiveDot className="text-cyan-300" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-ink-50">
-              The Honest Choice
+              Честный Выбор
             </h3>
             <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
-              Market floor vs partner + cashback — the math always shown,
-              never hidden.
+              Рыночный пол против партнёра с кэшбеком — математика всегда
+              открыта, ничего не прячем.
             </p>
             <button
-              onClick={() =>
-                queueIntent("cheapest AirPods Pro 3 with real warranty")
-              }
-              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-cyan-400/25 bg-cyan-400/5 px-3.5 py-2.5 text-left text-[13px] text-cyan-100 transition-all duration-200 hover:border-cyan-300/60 hover:bg-cyan-400/10 group-hover:translate-x-0 hover:translate-x-1"
+              onClick={() => queueIntent("самые дешёвые AirPods Pro 3")}
+              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-cyan-400/25 bg-cyan-400/5 px-3.5 py-2.5 text-left text-[13px] text-cyan-100 transition-all duration-200 hover:translate-x-1 hover:border-cyan-300/60 hover:bg-cyan-400/10"
             >
-              <span className="font-mono">cheapest AirPods Pro 3…</span>
+              <span className="font-mono">самые дешёвые AirPods Pro 3…</span>
               <IcArrow className="text-cyan-300" />
             </button>
           </Panel>
@@ -146,30 +145,30 @@ export function MissionBoard() {
               <LiveDot className="text-violet-300" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-ink-50">
-              The Service Solver
+              Решатель Услуг
             </h3>
             <p className="mt-1 text-[13px] leading-relaxed text-ink-300">
-              One message becomes a ТЗ, a live tender and ranked bids — with
-              the AI Army on cold start.
+              Одно сообщение превращается в ТЗ, живые торги и ранжированные
+              отклики — с ИИ-армией на холодном старте.
             </p>
             <button
-              onClick={() => queueIntent("replace 3 windows, turnkey")}
-              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-violet-400/25 bg-violet-400/5 px-3.5 py-2.5 text-left text-[13px] text-violet-100 transition-all duration-200 hover:border-violet-300/60 hover:bg-violet-400/10 hover:translate-x-1"
+              onClick={() => queueIntent("заменить 3 окна под ключ")}
+              className="mt-4 inline-flex w-full items-center justify-between rounded-lg border border-violet-400/25 bg-violet-400/5 px-3.5 py-2.5 text-left text-[13px] text-violet-100 transition-all duration-200 hover:translate-x-1 hover:border-violet-300/60 hover:bg-violet-400/10"
             >
-              <span className="font-mono">replace 3 windows, turnkey</span>
+              <span className="font-mono">заменить 3 окна под ключ</span>
               <IcArrow className="text-violet-300" />
             </button>
           </Panel>
         </Reveal>
 
-        {/* orchestrator wire */}
+        {/* провод оркестратора */}
         <Reveal i={4}>
           <Panel className="flex items-center gap-3 px-4 py-3">
             <span className="shrink-0 text-amber-300">
               <IcBolt />
             </span>
             <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-400">
-              wire
+              провод
             </span>
             <div className="relative h-5 flex-1 overflow-hidden">
               <AnimatePresence mode="wait">
@@ -190,7 +189,11 @@ export function MissionBoard() {
                           : "text-amber-300"
                     }
                   >
-                    {line.agent}
+                    {line.agent === "product"
+                      ? "агент товаров"
+                      : line.agent === "tender"
+                        ? "тендерный"
+                        : line.agent}
                   </span>{" "}
                   {line.text}
                 </motion.span>
@@ -200,10 +203,57 @@ export function MissionBoard() {
         </Reveal>
       </div>
 
-      {/* ---- ledger: how it wins ---- */}
+      {/* ---- журнал запросов пользователя ---- */}
+      {sessions.length > 0 && (
+        <Reveal className="lg:col-span-12">
+          <div>
+            <div className="mb-3 flex items-baseline justify-between">
+              <SectionLabel>ваши запросы</SectionLabel>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink-500">
+                клик — вернуться к сессии
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {sessions.slice(-5).reverse().map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => selectSession(s.id)}
+                  className={`group flex items-center gap-2.5 rounded-full border px-4 py-2 text-[12.5px] transition-all duration-200 hover:-translate-y-0.5 ${
+                    s.mode === "product"
+                      ? "border-cyan-400/25 bg-cyan-400/5 text-cyan-100 hover:border-cyan-300/60 hover:bg-cyan-400/10"
+                      : "border-violet-400/25 bg-violet-400/5 text-violet-100 hover:border-violet-300/60 hover:bg-violet-400/10"
+                  } ${s.id === activeId ? "ring-1 ring-current" : ""}`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      s.mode === "product" ? "bg-cyan-300" : "bg-violet-300"
+                    }`}
+                  />
+                  «{s.query}»
+                  <span
+                    className={`font-mono text-[9px] uppercase tracking-wider ${
+                      s.mode === "product" ? "text-cyan-300/70" : "text-violet-300/70"
+                    }`}
+                  >
+                    {s.mode === "product"
+                      ? s.claimed
+                        ? "кэшбек ✓"
+                        : "товары"
+                      : s.secured
+                        ? "эскроу ✓"
+                        : "услуги"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      )}
+
+      {/* ---- почему агенты выигрывают ---- */}
       <Reveal className="lg:col-span-12">
         <div className="mt-2">
-          <SectionLabel className="mb-4">why agents win</SectionLabel>
+          <SectionLabel className="mb-4">почему агенты выигрывают</SectionLabel>
           <div className="grid gap-px overflow-hidden rounded-xl border border-ink-700 bg-ink-700 md:grid-cols-3">
             {LEDGER.map((row) => (
               <div

@@ -14,10 +14,10 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
   function send() {
     const v = parseInt(price.replace(/\D/g, ""), 10);
     if (!v || v < 1000) {
-      pushToast("Demo: contractor types one number — that's the whole form", "amber");
+      pushToast("Демо: подрядчик вводит одно число — вся форма целиком", "amber");
       return;
     }
-    pushToast(`Demo: bid ${fmtRub(v)} received via Smart-Link`, "violet");
+    pushToast(`Демо: отклик ${fmtRub(v)} получен через Smart-Link`, "violet");
     setPrice("");
   }
 
@@ -33,10 +33,10 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
           </span>
           <div>
             <SectionLabel className="text-amber-300/90">
-              smart-link · contractor view
+              смарт-ссылка · глазами подрядчика
             </SectionLabel>
             <p className="mt-0.5 text-xs text-ink-300">
-              exactly what a contractor opens — no app, no registration
+              ровно то, что открывает подрядчик — без приложения и регистрации
             </p>
           </div>
         </div>
@@ -57,7 +57,6 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="grid gap-4 border-t border-ink-700 p-5 sm:grid-cols-[1fr_260px]">
-              {/* the link itself */}
               <div>
                 <div className="flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-950/60 px-3 py-2 font-mono text-xs text-ink-200">
                   <span className="text-amber-300">
@@ -65,7 +64,7 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
                   </span>
                   https://{tender.smartlink.url}
                   <span className="ml-auto rounded bg-amber-400/15 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-amber-300">
-                    1 field
+                    1 поле
                   </span>
                 </div>
                 <ul className="mt-4 space-y-2 text-xs text-ink-300">
@@ -79,21 +78,19 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
                   </li>
                 </ul>
                 <p className="mt-4 border-l-2 border-amber-400/50 pl-3 text-[12px] leading-relaxed text-ink-400">
-                  Contractors never register. The link carries the ТЗ, the photo
-                  and one price input — the bid flows straight into the
-                  comparison table.
+                  Подрядчики никогда не регистрируются. В ссылке — ТЗ, фото и
+                  одно поле цены; отклик сам прилетает в таблицу сравнения.
                 </p>
               </div>
 
-              {/* phone mock */}
               <div className="rounded-xl border border-ink-600 bg-ink-950 p-3">
                 <div className="flex items-center justify-between px-1 font-mono text-[9px] uppercase tracking-widest text-ink-500">
-                  <span>aura · smart-link</span>
-                  <span className="text-amber-300">secure</span>
+                  <span>aura · смарт-ссылка</span>
+                  <span className="text-amber-300">защита</span>
                 </div>
                 <MediaImg
                   src={tender.photo}
-                  alt="window opening"
+                  alt="оконный проём"
                   icon={<IcDoc />}
                   className="mt-2 h-28 w-full rounded-lg object-cover"
                 />
@@ -108,14 +105,14 @@ export function SmartLink({ tender }: { tender: TenderPayload }) {
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     inputMode="numeric"
-                    placeholder="Your price, ₽"
+                    placeholder="Ваша цена, ₽"
                     className="min-w-0 flex-1 rounded-md border border-ink-600 bg-ink-850 px-2 py-1.5 font-mono text-[11px] text-ink-100 outline-none placeholder:text-ink-500 focus:border-amber-400/60"
                   />
                   <button
                     onClick={send}
                     className="rounded-md bg-amber-300 px-2.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-ink-950 transition-all hover:bg-amber-200 active:scale-95"
                   >
-                    bid
+                    отклик
                   </button>
                 </div>
               </div>

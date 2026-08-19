@@ -51,42 +51,42 @@ export const AGENT_META: Record<
   { name: string; fg: string; bg: string; bd: string; icon: ReactNode }
 > = {
   orchestrator: {
-    name: "Orchestrator",
+    name: "Оркестратор",
     fg: "text-ink-100",
     bg: "bg-ink-700",
     bd: "border-ink-500",
     icon: <IcSpark />,
   },
   product: {
-    name: "Product Agent",
+    name: "Агент Товаров",
     fg: "text-cyan-300",
     bg: "bg-cyan-400/10",
     bd: "border-cyan-400/30",
     icon: <IcTag />,
   },
   tender: {
-    name: "Tender Agent",
+    name: "Тендерный Агент",
     fg: "text-violet-300",
     bg: "bg-violet-400/10",
     bd: "border-violet-400/30",
     icon: <IcDoc />,
   },
   scout: {
-    name: "Scout",
+    name: "Разведчик",
     fg: "text-amber-300",
     bg: "bg-amber-400/10",
     bd: "border-amber-400/30",
     icon: <IcRadar />,
   },
   voice: {
-    name: "Voice AI",
+    name: "Голосовой ИИ",
     fg: "text-amber-300",
     bg: "bg-amber-400/10",
     bd: "border-amber-400/30",
     icon: <IcPhone />,
   },
   negotiator: {
-    name: "Negotiator",
+    name: "Переговорщик",
     fg: "text-amber-300",
     bg: "bg-amber-400/10",
     bd: "border-amber-400/30",

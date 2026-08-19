@@ -58,6 +58,23 @@ export const IcPhone = (p: P) => (
   </svg>
 );
 
+/* tv / screen */
+export const IcTv = (p: P) => (
+  <svg {...base(p)}>
+    <rect x="3.2" y="5" width="17.6" height="11.4" rx="1.4" />
+    <path d="M8.6 20h6.8M12 16.4V20" />
+  </svg>
+);
+
+/* vacuum */
+export const IcVacuum = (p: P) => (
+  <svg {...base(p)}>
+    <circle cx="12" cy="12" r="8.2" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 3.8v2.4M5.6 17.6l2-1.6" opacity=".7" />
+  </svg>
+);
+
 /* chat / whatsapp-style */
 export const IcChat = (p: P) => (
   <svg {...base(p)}>
