@@ -1,0 +1,27 @@
+{
+  "name": "Aura — AI Life & Shopping Orchestrator",
+  "short_name": "Aura",
+  "description": "Multi-agent orchestrator: honest product picks with cashback math, live service tenders, and an AI army that recruits contractors for you.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#06070a",
+  "theme_color": "#0b0c10",
+  "categories": ["productivity", "shopping", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "https://image.qwenlm.ai/generated-images/8e68383c-7147-4db3-8815-ac0f05258ee5/_result.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
